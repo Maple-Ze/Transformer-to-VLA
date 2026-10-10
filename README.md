@@ -2,7 +2,7 @@
 
 *从 Transformer 基础到视觉–语言–动作模型*
 
-[![MIT 许可证](https://img.shields.io/github/license/Maple-Ze/Transformer-to-VLA?label=%E8%AE%B8%E5%8F%AF%E8%AF%81&color=blue)](LICENSE)
+[![MIT License](https://img.shields.io/github/license/Maple-Ze/Transformer-to-VLA?label=license&color=blue)](LICENSE)
 
 ## 项目简介
 
@@ -19,7 +19,7 @@
 
 | 阶段 | 主题 | 主要内容 | 状态 |
 | --- | --- | --- | --- |
-| 01 | Self-Attention & MiniGPT | Q/K/V、缩放点积注意力、多头注意力、因果掩码、嵌入、Transformer 模块、下一词元预测、自回归生成 | ✅ 已完成 |
+| 01 | Attention Fundamentals | Q/K/V、缩放点积注意力、多头注意力、因果掩码、嵌入、Transformer 模块、下一词元预测、自回归生成 | ✅ 已完成 |
 | 02 | Encoder-Decoder Transformer | 交叉注意力、后置层归一化、正弦位置编码、教师强制、序列到序列反转 | 🚧 学习中 |
 | 03 | Vision Transformer | 图像分块嵌入、位置嵌入、ViT 编码器、图像分类 | 📋 计划中 |
 | 04 | Diffusion Transformer | 注意力在扩散与生成模型中的应用 | 📋 计划中 |
@@ -32,7 +32,7 @@
 
 | 阶段 | 实验代码 | 笔记 | 在线运行 |
 | --- | --- | --- | --- |
-| 01 · Self-Attention & MiniGPT | [打开笔记本](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) | [阅读笔记](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.md) | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) |
+| 01 · Attention Fundamentals | [打开笔记本](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) | [阅读笔记](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.md) | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) |
 | 02 · Encoder-Decoder Transformer | [打开笔记本](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | — | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
 
 按阶段运行代码，结合笔记分析结果；调整头数、序列长度、掩码或任务规则进行对比实验。
