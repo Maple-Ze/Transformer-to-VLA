@@ -3,6 +3,7 @@
 *From Transformer Fundamentals to Vision-Language-Action Models*
 
 [![MIT License](https://img.shields.io/github/license/Maple-Ze/Transformer-to-VLA?label=license&color=blue)](LICENSE)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb)
 
 ## Overview
 
@@ -12,10 +13,14 @@ vision models, and robot foundation models.
 This repository aims to build a bottom-up understanding of these models
 through minimal PyTorch implementations and tensor-level analysis.
 
+The learning path follows the evolution from attention mechanisms to
+encoder-decoder architectures, vision transformers, multimodal models,
+and vision-language-action systems.
+
 ## Features
 
-- **Implementation First**: Understand model mechanisms by building, running, and modifying code.
 - **From-Scratch Modules**: Implement core Transformer computations using basic PyTorch components.
+- **Implementation First**: Understand model mechanisms by building, running, and modifying code.
 - **Tensor-Level Analysis**: Trace shape changes such as `[B, T, C] → [B, H, T, D]`.
 - **Math-Driven Explanations**: Connect equations, design choices, and implementation details.
 - **Minimal Experiments**: Explore attention behavior, masking, sequence modeling, and generation.
