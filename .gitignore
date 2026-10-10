@@ -1,0 +1,40 @@
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Notebook checkpoints (keep the teaching notebooks)
+.ipynb_checkpoints/
+
+# Local secrets and machine settings
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+
+# Training artifacts and experiment logs
+checkpoints/
+runs/
+wandb/
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.log
+
+# System and editor temporary files
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
+*.swp
+*.swo
+*.tmp
