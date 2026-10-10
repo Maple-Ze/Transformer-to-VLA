@@ -1,6 +1,6 @@
-# 01 — Diffusion Policy：二维轨迹生成学习笔记
+# 01 — DDPM Policy：条件二维轨迹生成学习笔记
 
-> 对应 `01_DDPM_Policy.ipynb`。整理自《重要：：diffusion》的 `dataset.py → diffusion.py → model.py → train.py → sample.py` 教学实现及随后关于 `H=16`、起终点、轨迹颜色顺序的提问；补入必要的代码与原理联系。非逐字转录。
+> 对应 [01_DDPM_Policy.ipynb](01_DDPM_Policy.ipynb)。整理自《重要：：diffusion》的 `dataset.py → diffusion.py → model.py → train.py → sample.py` 教学实现及随后关于 `H=16`、起终点、轨迹颜色顺序的提问；补入必要的代码与原理联系。非逐字转录。
 
 ## 一、Diffusion Policy 与生成二维点有什么不同？
 
@@ -14,7 +14,7 @@ $$
 
 ## 二、`generate_data(batch)` 到底生成了什么？
 
-历史代码采用：
+当前 Notebook 的数据构造为：
 
 ```python
 start = torch.rand(batch, 2, device=device) * 2 - 1
@@ -25,7 +25,10 @@ trajectory = (
     start[:, None, :] * (1-ratio[None, :, None])
     + goal[:, None, :] * ratio[None, :, None]
 )
-trajectory += 0.02 * torch.randn_like(trajectory)
+noise = 0.02 * torch.randn_like(trajectory)
+noise[:, 0] = 0
+noise[:, -1] = 0
+trajectory = trajectory + noise
 ```
 
 **问题：这是不是随机起点、随机终点，然后用直线连接起来？** 对。随机生成二维起终点，用 16 个插值比例连接，再加入小幅噪声。这样训练数据不需要外部机器人数据集，就能专注学习条件轨迹扩散。
@@ -34,7 +37,7 @@ trajectory += 0.02 * torch.randn_like(trajectory)
 
 **为什么要 `start[:,None,:]`？** 为 `[B,2]` 增添一个时间维，变成 `[B,1,2]`，再与 `ratio[None,:,None]` 广播，最终产生 `[B,H,2]`。
 
-**重要限制**：随机扰动也会作用于首尾点，所以数据中的首尾点并非数学上严格等于条件起点/终点；生成结果更不保证端点精确命中。想严格满足端点，可在数据构造时固定首尾点，或在采样后进行端点投影/采用专门的条件约束方法。
+**训练数据与生成结果的区别**：早期版本也对首尾点添加扰动；当前 Notebook 将首尾噪声置零，因此训练轨迹的端点严格等于条件起点/终点。生成时没有端点投影，网络输出仍可能偏离条件，需用端点误差检查。配套 Flow Matching Policy 使用同样的数据分布，两个实验分别随机采样，并非共享同一批样本。
 
 ## 三、为什么观测 `obs` 要拼接起点和终点？
 
@@ -57,15 +60,17 @@ $$
 
 它们是两套不同的时间尺度。`H` 描述将来执行的动作序列长度；`T` 描述一次生成算法内部的推理迭代次数。千万不要把第 16 个轨迹点当成第 16 次去噪。
 
+当前线性调度在 `T=100` 时得到 `alpha_bar[-1] ≈ 0.364`，所以前向末端尚未接近纯标准高斯；反向过程从标准高斯初始化存在先验不匹配。保留此配置用于入门实验，若比较 `T=1000`，应重新构造调度并训练；相同线性端点下累计信号系数约为 `4.04e-5`。
+
 ## 五、怎么对整个轨迹加噪？
 
 $$
 A_t=\sqrt{\bar\alpha_t}A_0+
 \sqrt{1-\bar\alpha_t}\epsilon,
-\quad\epsilon\sim\mathcal N(0,I_{H\times 2}).
+\quad\operatorname{vec}(\epsilon)\sim\mathcal N(0,I_{2H}).
 $$
 
-`epsilon` 的形状与 `A0` 一致 `[B,16,2]`，同一扩散时间步对应一整个轨迹样本。模型学习：
+这里将 $2H$ 个独立标准高斯数整理为 $H\times2$ 的噪声矩阵，协方差 $I_{2H}$ 是方阵。`epsilon` 的形状与 `A0` 一致 `[B,16,2]`，同一扩散时间步对应一整个轨迹样本。公式用 $t=1,\ldots,T$，代码索引 `t=0,...,T-1` 对应公式的第 `t+1` 步；反向采样从 $A_T$ 逐步得到 $A_0$。模型学习：
 
 $$
 \epsilon_\theta(A_t,t,o)\in\mathbb R^{16\times 2},
@@ -101,9 +106,9 @@ DDPM 每次从新的高斯噪声轨迹出发，因此同一个条件可以产生
 
 ## 九、代码检查与后续实验
 
-- `generate_data`：打印形状，观察噪声 `0.02` 对起终点的影响。
+- `generate_data`：打印形状，验证端点严格等于条件，噪声 `0.02` 只影响内部 waypoint。
 - `q_sample`：验证整条 `H×2` 轨迹一起加噪。
-- `NoisePredictor`：确认条件向量不会被扩散。
+- `ConditionalNoisePredictor`：确认条件向量不会被扩散。
 - `sample_policy`：固定 `obs`、改变初始采样噪声，多次生成，观察多样性。
 - `draw_trajectory`：使用渐变色，并同时标出条件起点/终点。
 - Endpoint error / Smoothness 只是教学指标；它们不能证明避障安全或任务成功。

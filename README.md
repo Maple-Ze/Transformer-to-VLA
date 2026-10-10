@@ -17,13 +17,15 @@ The learning path follows the evolution from attention mechanisms to
 encoder-decoder architectures, vision transformers, multimodal models,
 and vision-language-action systems.
 
+Diffusion and flow matching experiments introduce generative modeling and conditional action sequences through small MLPs.
+
 ## Features
 
 - **From-Scratch Modules**: Implement core Transformer computations using basic PyTorch components.
 - **Implementation First**: Understand model mechanisms by building, running, and modifying code.
 - **Tensor-Level Analysis**: Trace shape changes such as `[B, T, C] → [B, H, T, D]`.
 - **Math-Driven Explanations**: Connect equations, design choices, and implementation details.
-- **Minimal Experiments**: Explore attention behavior, masking, sequence modeling, and generation.
+- **Minimal Experiments**: Explore attention, masking, sequence modeling, denoising, and flow-based generation.
 
 ## Learning Roadmap
 
@@ -44,8 +46,15 @@ Notebooks provide runnable implementations; accompanying notes cover mathematica
 | --- | --- | --- | --- |
 | 01 · Attention Fundamentals | [Notebook](01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) | [Notes](01_Attention_Fundamentals/01_Attention_Fundamentals.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) |
 | 02 · Encoder-Decoder Transformer | [Notebook](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
+| 04.1.1 · DDPM: 2D Ring | [Notebook](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) | [Notes](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) |
+| 04.1.2 · DDPM: 2D Gaussian Mixture | [Notebook](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) | [Notes](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) |
+| 04.2.1 · Flow Matching: 1D Gaussian | [Notebook](04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) | [Notes](04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) |
+| 04.3.1 · DDPM Policy | [Notebook](04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) | [Notes](04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) |
+| 04.3.2 · Flow Matching Policy | [Notebook](04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) |
 
-Work through the stages in order, using the notes to interpret results. Compare behavior by changing head counts, sequence lengths, masks, or task rules.
+**Stage 04** progresses from DDPM noise prediction on a ring and an eight-mode mixture, to velocity-field learning with Euler integration, then start/goal-conditioned 2D waypoint generation. The two policy examples use the same synthetic data distribution and produce `[B, H, 2]` trajectories, with `H=16` by default. They demonstrate generative policy mechanisms using MLPs; DiT, visual conditioning, and robot execution remain future extensions.
+
+Follow the numbered notebooks within each available stage. Use the notes to interpret results, then vary attention heads, masks, noise schedules, or ODE steps to compare behavior.
 
 ## Getting Started
 
@@ -101,6 +110,9 @@ Transformer-to-VLA/
 - Vaswani et al., [Attention Is All You Need](https://arxiv.org/abs/1706.03762), 2017.
 - Radford et al., [Language Models are Unsupervised Multitask Learners](https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf), 2019.
 - Dosovitskiy et al., [An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale](https://arxiv.org/abs/2010.11929), 2020.
+- Ho et al., [Denoising Diffusion Probabilistic Models](https://arxiv.org/abs/2006.11239), 2020.
+- Lipman et al., [Flow Matching for Generative Modeling](https://arxiv.org/abs/2210.02747), 2023.
+- Chi et al., [Diffusion Policy: Visuomotor Policy Learning via Action Diffusion](https://arxiv.org/abs/2303.04137), 2023.
 
 ## License
 
