@@ -2,6 +2,8 @@
 
 *从 Transformer 基础到视觉–语言–动作模型*
 
+[![MIT 许可证](https://img.shields.io/github/license/Maple-Ze/Transformer-to-VLA?label=%E8%AE%B8%E5%8F%AF%E8%AF%81&color=blue)](LICENSE)
+
 ## 项目简介
 
 通过 PyTorch 从零实现 Transformer 核心模块，结合数学推导、张量分析与最小实验，逐步扩展到 ViT、多模态模型和 VLA。
