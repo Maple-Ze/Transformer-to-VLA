@@ -32,7 +32,7 @@
 
 | 阶段 | 实验代码 | 笔记 | 在线运行 |
 | --- | --- | --- | --- |
-| 01 · Attention Fundamentals | [打开笔记本](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) | [阅读笔记](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.md) | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) |
+| 01 · Attention Fundamentals | [打开笔记本](01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) | [阅读笔记](01_Attention_Fundamentals/01_Attention_Fundamentals.md) | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) |
 | 02 · Encoder-Decoder Transformer | [打开笔记本](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | — | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
 
 按阶段运行代码，结合笔记分析结果；调整头数、序列长度、掩码或任务规则进行对比实验。
@@ -69,9 +69,9 @@ Transformer-to-VLA/
 ├── LICENSE
 ├── .gitignore
 ├── requirements.txt
-├── 01_Self_Attention_and_MiniGPT/
-│   ├── 01_Self_Attention_and_MiniGPT.ipynb
-│   ├── 01_Self_Attention_and_MiniGPT.md
+├── 01_Attention_Fundamentals/
+│   ├── 01_Attention_Fundamentals.ipynb
+│   ├── 01_Attention_Fundamentals.md
 │   └── assets/
 │       ├── minigpt_flow.png
 │       └── minigpt_flow.py
