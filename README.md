@@ -25,7 +25,7 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 - **Implementation First**: Understand model mechanisms by building, running, and modifying code.
 - **Tensor-Level Analysis**: Trace shape changes such as `[B, T, C] → [B, H, T, D]`.
 - **Math-Driven Explanations**: Connect equations, design choices, and implementation details.
-- **Minimal Experiments**: Explore attention, masking, sequence modeling, denoising, and flow-based generation.
+- **Minimal Experiments**: Explore attention, masking, sequence modeling, image classification, denoising, and flow-based generation.
 
 ## Learning Roadmap
 
@@ -33,7 +33,7 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 | --- | --- | --- | --- |
 | 01 | Attention Fundamentals | Q/K/V, scaled dot-product attention, multi-head attention, causal masking, embeddings, Transformer blocks, next-token prediction, autoregressive generation | ✅ Completed |
 | 02 | Encoder-Decoder Transformer | Cross-attention, post-layer normalization, sinusoidal positional encoding, teacher forcing, sequence-to-sequence reversal | 🚧 In Progress |
-| 03 | Vision Transformer | Patch embeddings, positional embeddings, ViT encoder, image classification | 📋 Planned |
+| 03 | [Vision Transformers](03_Vision_Transformers/) | Patch/CLS tokens, positional embeddings, image classification, visual projection | 🚧 In Progress |
 | 04 | [Diffusion and Flow Models](04_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
 | 05 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
 | 06 | Vision-Language-Action | From multimodal representations to robot action generation | 📋 Planned |
@@ -47,11 +47,15 @@ Notebooks provide runnable implementations; accompanying notes cover mathematica
 | --- | --- | --- | --- |
 | 01 · Attention Fundamentals | [Notebook](01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) | [Notes](01_Attention_Fundamentals/01_Attention_Fundamentals.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) |
 | 02 · Encoder-Decoder Transformer | [Notebook](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
+| 03.1 · ViT from Scratch | [Notebook](03_Vision_Transformers/01_ViT_From_Scratch.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/03_Vision_Transformers/01_ViT_From_Scratch.ipynb) |
+| 03.2 · Visual Token Projection | [Notebook](03_Vision_Transformers/02_Visual_Token_Projection.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/03_Vision_Transformers/02_Visual_Token_Projection.ipynb) |
 | 04.1.1 · DDPM: 2D Ring | [Notebook](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) | [Notes](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) |
 | 04.1.2 · DDPM: 2D Gaussian Mixture | [Notebook](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) | [Notes](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) |
 | 04.2.1 · Flow Matching: 1D Gaussian | [Notebook](04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) | [Notes](04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) |
 | 04.3.1 · DDPM Policy | [Notebook](04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) | [Notes](04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) |
 | 04.3.2 · Flow Matching Policy | [Notebook](04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) |
+
+**Stage 03** builds and trains a small ViT classifier on synthetic stripe images, then demonstrates visual projection, image/text token concatenation, padding masks, and gradient flow. It uses PyTorch attention/encoder components; the projection notebook is an untrained interface experiment.
 
 **Stage 04** progresses from DDPM noise prediction on a ring and an eight-mode mixture, to velocity-field learning with Euler integration, then start/goal-conditioned 2D waypoint generation. The two policy examples use the same synthetic data distribution and produce `[B, H, 2]` trajectories, with `H=16` by default. They demonstrate generative policy mechanisms using MLPs; DiT, visual conditioning, and robot execution remain future extensions.
 
@@ -91,6 +95,9 @@ Transformer-to-VLA/
 │       └── minigpt_flow.py
 ├── 02_Encoder_Decoder_Transformer/
 │   └── 02_Encoder_Decoder_Transformer.ipynb
+├── 03_Vision_Transformers/
+│   ├── 01_ViT_From_Scratch.ipynb
+│   └── 02_Visual_Token_Projection.ipynb
 └── 04_Diffusion_and_Flow_Models/
     ├── 01_DDPM_Fundamentals/
     │   ├── 01_2D_Ring.ipynb
