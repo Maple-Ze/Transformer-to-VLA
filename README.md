@@ -96,11 +96,7 @@ Transformer-to-VLA/
 │   ├── badges/notebooks.json
 │   └── workflows/notebook-count.yml
 ├── 01_Attention_Fundamentals/
-│   ├── 01_Attention_Fundamentals.ipynb
-│   ├── 01_Attention_Fundamentals.md
-│   └── assets/
-│       ├── minigpt_flow.png
-│       └── minigpt_flow.py
+│   └── 01_Attention_Fundamentals.ipynb
 ├── 02_Encoder_Decoder_Transformer/
 │   └── 02_Encoder_Decoder_Transformer.ipynb
 ├── 03_Vision_Transformers/
@@ -109,15 +105,11 @@ Transformer-to-VLA/
 └── 04_Diffusion_and_Flow_Models/
     ├── 01_DDPM_Fundamentals/
     │   ├── 01_2D_Ring.ipynb
-    │   ├── 01_2D_Ring.md
-    │   ├── 02_2D_Gaussian_Mixture.ipynb
-    │   └── 02_2D_Gaussian_Mixture.md
+    │   └── 02_2D_Gaussian_Mixture.ipynb
     ├── 02_Flow_Matching/
-    │   ├── 01_1D_Gaussian.ipynb
-    │   └── 01_1D_Gaussian.md
+    │   └── 01_1D_Gaussian.ipynb
     └── 03_Generative_Policies/
         ├── 01_DDPM_Policy.ipynb
-        ├── 01_DDPM_Policy.md
         └── 02_Flow_Matching_Policy.ipynb
 ```
 
