@@ -3,6 +3,7 @@
 *From Transformer Fundamentals to Vision-Language-Action Models*
 
 [![MIT License](https://img.shields.io/github/license/Maple-Ze/Transformer-to-VLA?label=license&color=blue)](LICENSE)
+[![Notebooks](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FMaple-Ze%2FTransformer-to-VLA%2Fmain%2F.github%2Fbadges%2Fnotebooks.json&logo=jupyter&logoColor=white)](#implementations--notes)
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb)
 
 ## Overview
@@ -87,6 +88,9 @@ Transformer-to-VLA/
 ├── LICENSE
 ├── .gitignore
 ├── requirements.txt
+├── .github/
+│   ├── badges/notebooks.json
+│   └── workflows/notebook-count.yml
 ├── 01_Attention_Fundamentals/
 │   ├── 01_Attention_Fundamentals.ipynb
 │   ├── 01_Attention_Fundamentals.md
