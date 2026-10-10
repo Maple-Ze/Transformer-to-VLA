@@ -44,6 +44,8 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 
 Notebooks provide runnable implementations; accompanying notes cover mathematical explanations, tensor analysis, and design discussions.
 
+Explore the [Knowledge Base](KNOWLEDGE_BASE.md) for core concepts, cross-chapter connections, and open questions.
+
 | Stage | Notebook | Notes | Colab |
 | --- | --- | --- | --- |
 | 01 · Attention Fundamentals | [Notebook](01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) | [Notes](01_Attention_Fundamentals/01_Attention_Fundamentals.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb) |
@@ -85,6 +87,8 @@ Open a notebook in Jupyter or VS Code and select the environment's Python kernel
 ```text
 Transformer-to-VLA/
 ├── README.md
+├── KNOWLEDGE_BASE.md
+├── AGENTS.md
 ├── LICENSE
 ├── .gitignore
 ├── requirements.txt
