@@ -37,6 +37,7 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 | 04 | [Diffusion and Flow Models](04_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
 | 05 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
 | 06 | Vision-Language-Action | From multimodal representations to robot action generation | 📋 Planned |
+| 07 | World-Action Models (WAM) | World dynamics prediction and action generation | 📋 Planned |
 
 ## Implementations & Notes
 
