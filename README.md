@@ -32,7 +32,7 @@ and vision-language-action systems.
 | 01 | Attention Fundamentals | Q/K/V, scaled dot-product attention, multi-head attention, causal masking, embeddings, Transformer blocks, next-token prediction, autoregressive generation | ✅ Completed |
 | 02 | Encoder-Decoder Transformer | Cross-attention, post-layer normalization, sinusoidal positional encoding, teacher forcing, sequence-to-sequence reversal | 🚧 In Progress |
 | 03 | Vision Transformer | Patch embeddings, positional embeddings, ViT encoder, image classification | 📋 Planned |
-| 04 | Diffusion Transformer | Attention in diffusion and generative models | 📋 Planned |
+| 04 | [Diffusion and Flow Models](04_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
 | 05 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
 | 06 | Vision-Language-Action | From multimodal representations to robot action generation | 📋 Planned |
 
@@ -79,8 +79,21 @@ Transformer-to-VLA/
 │   └── assets/
 │       ├── minigpt_flow.png
 │       └── minigpt_flow.py
-└── 02_Encoder_Decoder_Transformer/
-    └── 02_Encoder_Decoder_Transformer.ipynb
+├── 02_Encoder_Decoder_Transformer/
+│   └── 02_Encoder_Decoder_Transformer.ipynb
+└── 04_Diffusion_and_Flow_Models/
+    ├── 01_DDPM_Fundamentals/
+    │   ├── 01_2D_Ring.ipynb
+    │   ├── 01_2D_Ring.md
+    │   ├── 02_2D_Gaussian_Mixture.ipynb
+    │   └── 02_2D_Gaussian_Mixture.md
+    ├── 02_Flow_Matching/
+    │   ├── 01_1D_Gaussian.ipynb
+    │   └── 01_1D_Gaussian.md
+    └── 03_Generative_Policies/
+        ├── 01_DDPM_Policy.ipynb
+        ├── 01_DDPM_Policy.md
+        └── 02_Flow_Matching_Policy.ipynb
 ```
 
 ## References
