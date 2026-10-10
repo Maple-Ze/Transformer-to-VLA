@@ -26,11 +26,22 @@
 | 05 | Multimodal Transformer | 视觉与语言词元、多模态融合 | 📋 计划中 |
 | 06 | Vision-Language-Action | 从多模态表征到机器人动作生成 | 📋 计划中 |
 
+## 学习资料
+
+实验笔记本提供可运行代码，配套笔记提供数学解释、张量分析与设计讨论。
+
+| 阶段 | 实验代码 | 笔记 | 在线运行 |
+| --- | --- | --- | --- |
+| 01 · Self-Attention & MiniGPT | [打开笔记本](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) | [阅读笔记](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.md) | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) |
+| 02 · Encoder-Decoder Transformer | [打开笔记本](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | — | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
+
+按阶段运行代码，结合笔记分析结果；调整头数、序列长度、掩码或任务规则进行对比实验。
+
 ## 快速开始
 
 ### 使用 Google Colab
 
-1. 点击下方资料导航中的 Colab 按钮在线运行；也可下载 `.ipynb`，在 [Google Colab](https://colab.research.google.com/) 中选择 **文件 → 上传笔记本**。
+1. 点击上方资料导航中的 Colab 按钮在线运行；也可下载 `.ipynb`，在 [Google Colab](https://colab.research.google.com/) 中选择 **文件 → 上传笔记本**。
 2. 从第一个代码单元开始按顺序执行；重新开始实验时，重启运行时并从头运行。
 3. 代码自动选择可用的 CUDA GPU，否则使用 CPU。可通过 **运行时 → 更改运行时类型** 选择 GPU。
 
@@ -49,17 +60,6 @@ python -m pip install -r requirements.txt
 ```
 
 使用 Jupyter 或 VS Code 打开实验笔记本，选择安装了上述依赖的内核。
-
-## 学习资料
-
-实验笔记本提供可运行代码，配套笔记提供数学解释、张量分析与设计讨论。
-
-| 阶段 | 实验代码 | 笔记 | 在线运行 |
-| --- | --- | --- | --- |
-| 01 · Self-Attention & MiniGPT | [打开笔记本](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) | [阅读笔记](01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.md) | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/01_Self_Attention_and_MiniGPT/01_Self_Attention_and_MiniGPT.ipynb) |
-| 02 · Encoder-Decoder Transformer | [打开笔记本](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | — | [![在 Colab 中打开](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
-
-按阶段运行代码，结合笔记分析结果；调整头数、序列长度、掩码或任务规则进行对比实验。
 
 ## 项目结构
 

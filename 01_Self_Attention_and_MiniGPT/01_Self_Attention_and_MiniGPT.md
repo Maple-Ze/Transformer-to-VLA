@@ -1,5 +1,7 @@
 # Transformer 学习笔记：从 Self-Attention 到 Mini-GPT
 
+[返回项目首页](../README.md) · [配套实验](01_Self_Attention_and_MiniGPT.ipynb)
+
 > 基于《Transformer 从零入门》Google Colab Notebook 和本次学习中的连续问答整理。聚焦 Transformer 机制及设计动机，不整理 PyTorch API、张量操作语法和 Colab 设置。
 >
 > **学习主线**：Token ID → Token / Position Embedding → Q/K/V → Scaled Dot-Product Attention → Causal Mask → Multi-Head Attention → Transformer Block → Next-Token Prediction → Autoregressive Generation。
@@ -373,3 +375,7 @@ $$P(x_{t+1}\mid x_{\le t})=P(x_{t+1}\mid x_t).$$
 ---
 
 *笔记范围：当前入门 Notebook 与学习问答。后续可扩展 Cross-Attention、完整 Encoder–Decoder、RoPE、KV Cache，以及适用于长距离依赖的实验。*
+
+---
+
+[返回项目首页](../README.md) · [配套实验](01_Self_Attention_and_MiniGPT.ipynb) · [下一章：02 · Encoder-Decoder Transformer](../02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb)
