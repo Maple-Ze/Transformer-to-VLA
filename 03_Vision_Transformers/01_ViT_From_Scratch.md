@@ -185,11 +185,11 @@ $$
 
 $$
 \begin{aligned}
-Z_\ell &= \operatorname{LN}(X_\ell),\\
-H_\ell &= \operatorname{MHA}(Z_\ell,Z_\ell,Z_\ell),\\
+Z_\ell &= \mathrm{LN}(X_\ell),\\
+H_\ell &= \mathrm{MHA}(Z_\ell,Z_\ell,Z_\ell),\\
 U_\ell &= X_\ell+H_\ell,\\
 X_{\ell+1} &= U_\ell+
-\operatorname{MLP}\left(\operatorname{LN}(U_\ell)\right).
+\mathrm{MLP}\left(\mathrm{LN}(U_\ell)\right).
 \end{aligned}
 $$
 
@@ -243,7 +243,7 @@ $$
 注意力权重：
 
 $$
-\boxed{A_h=\operatorname{softmax}\left(\frac{Q_hK_h^\top}{\sqrt{16}}\right)}
+\boxed{A_h=\mathrm{softmax}\left(\frac{Q_hK_h^\top}{\sqrt{16}}\right)}
 $$
 
 Softmax 沿 Key 维（每一行）计算。本节未使用 Attention Dropout，因此完整一行的 17 个权重之和为 1。
@@ -303,7 +303,7 @@ $$
 $$
 \begin{aligned}
 O_{\mathrm{cat}}^{\mathrm{CLS}}
-&=\operatorname{Concat}\left(
+&=\mathrm{Concat}\left(
 O_1^{\mathrm{CLS}},
 O_2^{\mathrm{CLS}},
 O_3^{\mathrm{CLS}},
@@ -377,7 +377,7 @@ $$
 实际代码先读取序列第 0 个位置，再执行最终的 LayerNorm。由于本节 LayerNorm 仅沿每个 Token 的特征维归一化，这等价于先归一化整个序列、再读取 CLS：
 
 $$
-\mathbf f_{\mathrm{CLS}}=\operatorname{LN}\left((X_{\mathrm{final}})_{:,0,:}\right)
+\mathbf f_{\mathrm{CLS}}=\mathrm{LN}\left((X_{\mathrm{final}})_{:,0,:}\right)
 \in\mathbb R^{B\times64}.
 $$
 

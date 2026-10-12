@@ -111,8 +111,8 @@ Padding Mask 不会自动将填充位置的 Query 输出清零；逐 Token 损�
 归一化位置是另一条设计轴，不能用 Pre-LN / Post-LN 来定义 Encoder 或 Decoder。以一个子层 $F$ 为例：
 
 $$
-\text{Pre-LN: }Y=X+F(\operatorname{LN}(X)),\qquad
-\text{Post-LN: }Y=\operatorname{LN}(X+F(X)).
+\text{Pre-LN: }Y=X+F(\mathrm{LN}(X)),\qquad
+\text{Post-LN: }Y=\mathrm{LN}(X+F(X)).
 $$
 
 Mini-GPT 与 TinyViT 使用 Pre-LN / GELU；第二章使用 Post-LN / ReLU；第三章独立的 `ToyVisionEncoder` 复用 PyTorch Encoder 的 Post-LN / ReLU 配置，并未加载 TinyViT 权重。Attention 负责跨 Token 交互，逐 Token MLP 负责非线性特征变换；LayerNorm 沿特征维归一化，残差连接保留直接的信息与梯度路径。
@@ -328,7 +328,7 @@ $$
 
 训练数据是起点 $s$ 到目标 $g$ 的线性插值，内部 waypoint 加标准差 0.02 的噪声，首尾噪声为零。两本使用相同的数据分布，但独立抽样。模型将片段展平，与时间嵌入、条件拼接，再输出 `[B,H,2]`。
 
-DDPM 学习 $\epsilon_\theta(A_t,t,o)$ ；FM 学习 $v_\theta(A_\tau,\tau,o)$ 。条件 $o$ 保持干净，不被扩散或流匹配插值；FM 的干净轨迹用于构造中间状态和速度监督，但不是额外直接输入。对整段轨迹采样高斯噪声意味着 $\operatorname{vec}(\epsilon)\sim\mathcal N(0,I_{2H})$ ，而不是非方阵“协方差”。
+DDPM 学习 $\epsilon_\theta(A_t,t,o)$ ；FM 学习 $v_\theta(A_\tau,\tau,o)$ 。条件 $o$ 保持干净，不被扩散或流匹配插值；FM 的干净轨迹用于构造中间状态和速度监督，但不是额外直接输入。对整段轨迹采样高斯噪声意味着 $\mathrm{vec}(\epsilon)\sim\mathcal N(0,I_{2H})$ ，而不是非方阵“协方差”。
 
 需要分清三个轴：
 
