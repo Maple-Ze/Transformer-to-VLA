@@ -56,9 +56,9 @@ $$
 | Self-Attention | 当前序列 | 同一序列 | `[B, n_h, L, L]` | Mini-GPT、ViT、拼接后的视觉/文本序列 |
 | Cross-Attention | 待读取信息的序列 | 另一组 memory | `[B, n_h, L_q, L_k]` | Decoder 读取 Encoder 输出 |
 
-第二章 Decoder 的 Query 长度可以不同于 Encoder memory 长度；每个 Query 读取全部合法源位置后，得到自身的输出表示。第三章把视觉和文本拼成同一序列再做 Self-Attention，虽然发生了跨模态交互，但并不是代码层面的 Cross-Attention 模块。
+第二章 Decoder 的 Query 长度可以与 Encoder memory 长度相等或不同；每个 Query 读取全部合法源位置后，得到自身的输出表示。代码中的 `assert T == S` 只限制当前因果掩码分支，不能用来判定是否为 Cross-Attention。第三章把视觉和文本拼成同一序列再做 Self-Attention，虽然发生了跨模态交互，但并不是代码层面的 Cross-Attention 模块。
 
-这两种连接方式为后续多模态融合提供接口思路；仓库尚未比较它们在真实视觉语言任务上的效果。来源：[Encoder–Decoder 实验][nb-encdec] 的 `MultiHeadAttention`；[Visual Token Projection][nb-projector] 的 `combined` / `attn`。
+这两种连接方式为后续多模态融合提供接口思路；仓库尚未比较它们在真实视觉语言任务上的效果。来源：[Encoder–Decoder 实验][nb-encdec] 的 `MultiHeadAttention` 与 [Notes §4–7][note-encdec]；[Visual Token Projection][nb-projector] 的 `combined` / `attn`。
 
 ### I.3 多头是否把信息割裂了？
 
@@ -374,7 +374,7 @@ DDPM 学习 $\epsilon_\theta(A_t,t,o)$；FM 学习 $v_\theta(A_\tau,\tau,o)$。�
 
 **Future Topics。** 至少需要实际完成图文语义训练或接入经过验证的预训练表示，定义机器人动作空间及归一化，使用匹配的观测—指令—动作数据，再验证条件信息能否改变正确的行为。生成端点接近、Projector 梯度非零，都不足以替代这些证据。
 
-生成式动作模型可以构成 VLA 的一部分，但“使用 Flow Matching”不是 VLA 的充分条件，也不是唯一实现方式。当前 Policy 的 MLP 是研究生成机制的起点；把它换成 Transformer，还要定义动作 Token、时间条件与跨模态信息路径。
+生成式动作模型可以构成 VLA 的一部分，但“使用 Flow Matching”不是 VLA 的充分条件，也不是唯一实现方式。LM Head 与 Action Head 的联系是任务输出接口；当前 LM Head 直接映射到词表 logits，DDPM / FM Policy 则需要条件网络与迭代采样，不能把 Action Expert 一概等同于线性层，见 [Encoder–Decoder Notes §9、§12][note-encdec]。当前 Policy 的 MLP 是研究生成机制的起点；把它换成 Transformer，还要定义动作 Token、时间条件与跨模态信息路径。
 
 用于后续阅读的具体参照：[Diffusion Policy](https://arxiv.org/abs/2303.04137) 将条件动作生成与视觉输入、滚动执行联系起来；[π₀](https://arxiv.org/abs/2410.24164) 是结合预训练视觉语言表示与 Flow Matching 动作生成的实例。这里仅定位后续学习接口，不表示已复现这些论文的结构、训练或机器人结果。
 
@@ -439,6 +439,7 @@ $$
 [nb-attention]: 01_Attention_Fundamentals/01_Attention_Fundamentals.ipynb
 [note-attention]: 01_Attention_Fundamentals/01_Attention_Fundamentals.md
 [nb-encdec]: 02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb
+[note-encdec]: 02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.md
 [nb-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.ipynb
 [nb-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.ipynb
 [nb-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb
