@@ -6,7 +6,7 @@
 
 本章学习原始 Transformer（Encoder–Decoder Transformer）结构。
 
-符号约定：$B$ 为批量大小，$S$ 为源序列长度，$T$ 为目标序列长度，$C=d_{\mathrm{model}}$ 为隐藏维度，$H$ 为 Attention 头数，$D=C/H$ 为每个 Head 的维度。
+符号约定： $B$ 为批量大小， $S$ 为源序列长度， $T$ 为目标序列长度， $C=d_{\mathrm{model}}$ 为隐藏维度， $H$ 为 Attention 头数， $D=C/H$ 为每个 Head 的维度。
 
 第一阶段已经学习：
 
@@ -195,15 +195,14 @@ $$
 统一公式：
 
 $$
-Attention(Q,K,V)
-=
+Attention(Q,K,V)=
 \mathrm{softmax}
 \left(
 \frac{QK^T}{\sqrt{d_k}}
 \right)V
 $$
 
-先考虑单个 Head，省略 Head 维；$d_k$ 为 Query/Key 维度，$d_v$ 为 Value 维度：
+先考虑单个 Head，省略 Head 维； $d_k$ 为 Query/Key 维度， $d_v$ 为 Value 维度：
 
 $$
 Q\in\mathbb{R}^{B\times T\times d_k}
@@ -414,8 +413,7 @@ $$
 ## 8.2 Sin/Cos 公式
 
 $$
-PE(pos,2i)
-=
+PE(pos,2i)=
 \sin
 \left(
 \frac{pos}{10000^{2i/d_{model}}}
@@ -423,8 +421,7 @@ PE(pos,2i)
 $$
 
 $$
-PE(pos,2i+1)
-=
+PE(pos,2i+1)=
 \cos
 \left(
 \frac{pos}{10000^{2i/d_{model}}}
@@ -527,7 +524,7 @@ $$
 Logits=HiddenW_{out}+b_{out}
 $$
 
-这里采用行向量右乘的数学记法，$W_{out}\in\mathbb{R}^{C\times V}$；PyTorch `nn.Linear` 存储的权重形状为 `[V,C]`，实际计算 `hidden @ weight.T + bias`。当前代码保留了 Bias。
+这里采用行向量右乘的数学记法， $W_{out}\in\mathbb{R}^{C\times V}$；PyTorch `nn.Linear` 存储的权重形状为 `[V,C]`，实际计算 `hidden @ weight.T + bias`。当前代码保留了 Bias。
 
 维度：
 
