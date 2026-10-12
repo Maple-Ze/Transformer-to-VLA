@@ -124,8 +124,10 @@ Mini-GPT 与 TinyViT 使用 Pre-LN / GELU；第二章使用 Post-LN / ReLU；第
 **数学事实。** 自回归分解将联合分布写成条件分布的乘积：
 
 $$
-p_\theta(x_{1:L})=\prod_{i=1}^{L}p_\theta(x_i\mid x_{<i}).
+p_\theta(x_{1:L})=\prod_{i=1}^{L}p_\theta(x_i\mid x_{1:i-1}).
 $$
+
+其中 $L$ 为序列长度， $x_i$ 为第 $i$ 个 Token， $x_{1:i-1}$ 表示此前的 Token 前缀；当 $i=1$ 时，该前缀为空。
 
 训练时真实序列已经给定，将输入与下一 Token 标签错开一位，配合 Causal Mask 可以一次计算各位置的损失。第二章以 `[BOS, target[:-1]]` 输入 Decoder，监督为含 EOS 的完整目标；右移和因果遮罩缺一不可。
 
