@@ -12,9 +12,9 @@
 | 教学简化 | 为隔离机制而采用的设计，不能直接推广到真实任务 |
 | Future Topics / 研究问题 | 尚未实现或验证的内容，不作为已有能力 |
 
-下文引用的实验数值来自 [已保存输出的版本 `38dd0d4`](https://github.com/Maple-Ze/Transformer-to-VLA/commit/38dd0d4)：默认参数、随机种子 42、CUDA 执行。它们是可追溯的单次观察，不是跨种子基准；修改模型或数据后应重新判断结论。
+除另有注明外，下文引用的实验数值来自 [已保存输出的版本 `38dd0d4`](https://github.com/Maple-Ze/Transformer-to-VLA/commit/38dd0d4)：默认参数、随机种子 42、CUDA 执行。ViT 的逐 Head 热力图与对应输出另见 [`faff6d6`](https://github.com/Maple-Ze/Transformer-to-VLA/commit/faff6d6)，训练配置未变。它们是可追溯的单次观察，不是跨种子基准；修改模型或数据后应重新判断结论。
 
-为避免不同章节同名变量混淆，本文用 $B$ 表示批量，$L_q,L_k$ 表示 Query / Key 数，$C$ 表示隐藏维度，$n_h$ 表示 Attention 头数，$d_h=C/n_h$。动作长度用 $H$，DDPM 总步数用 $K$（代码变量 `T`），Flow 时间用 $\tau\in[0,1]$。原代码中的 `H` 在 Attention 章节表示头数，在 Policy 章节表示动作长度。
+为避免不同章节同名变量混淆，本文用 $B$ 表示批量， $L_q,L_k$ 表示 Query / Key 数， $C$ 表示隐藏维度， $n_h$ 表示 Attention 头数， $d_h=C/n_h$ 。动作长度用 $H$ ，DDPM 总步数用 $K$ （代码变量 `T`），Flow 时间用 $\tau\in[0,1]$ 。原代码中的 `H` 在 Attention 章节表示头数，在 Policy 章节表示动作长度。
 
 - [Part I — Transformer Fundamentals](#part-i)
 - [Part II — Vision Representation](#part-ii)
@@ -74,7 +74,9 @@ $$
 
 每个 Head 的投影可以使用全部输入 Channel；独立的是投影后的匹配和聚合。拼接后的输出投影重新混合各头信息。因此多头提供的是多套 Token 权重分布，而不是把原始 Token 分成互不通信的小组。
 
-在固定 $C$ 下，增加头数会减小 $d_h$。参数独立和随机初始化提供了不同分工的可能性，但不保证各头学到不同语义，也不保证更多 Head 更好。完整论证见 [Attention Notes §7][note-attention]；代码见 [Attention 实验][nb-attention] 的 `MultiHeadSelfAttention`。
+**权重与特征不能混淆。** 在 TinyViT 中，每个 Head 的权重是 `[B,17,17]`，Value 与加权输出是 `[B,17,16]`；4 个 Head 拼接的是 Value 加权后的输出，得到 `[B,17,64]`，再做输出投影。对权重取 Head Mean 只是可视化汇总，不能替代这个前向计算，也不是模型最终的 CLS Feature。推导与图解见 [ViT Notes §5–6][note-vit]。
+
+在固定 $C$ 下，增加头数会减小 $d_h$ 。参数独立和随机初始化提供了不同分工的可能性，但不保证各头学到不同语义，也不保证更多 Head 更好。完整论证见 [Attention Notes §7][note-attention]；代码见 [Attention 实验][nb-attention] 的 `MultiHeadSelfAttention`。
 
 ### I.4 位置与 Mask 分别解决什么问题？
 
@@ -145,11 +147,11 @@ N_v=\frac{H_{\mathrm{img}}W_{\mathrm{img}}}{P^2},\qquad
 Z_{\mathrm{patch}}\in\mathbb R^{B\times N_v\times D_v}.
 $$
 
-每个 patch 展平为 $P^2C_{\mathrm{in}}$ 维，再通过共享线性投影映射到 $D_v$。当前 `Conv2d(kernel_size=P, stride=P)` 实现这一操作；展平的是 patch 内像素，不是把整幅图像变成一个 Token。
+每个 patch 展平为 $P^2C_{\mathrm{in}}$ 维，再通过共享线性投影映射到 $D_v$ 。当前 `Conv2d(kernel_size=P, stride=P)` 实现这一操作；展平的是 patch 内像素，不是把整幅图像变成一个 Token。
 
-TinyViT 的默认路径是 `[B,1,32,32] → [B,16,64]`。空间结构通过 patch 的排列及位置嵌入进入模型。减小 $P$ 会增加 Token 数；在隐藏维度不变时，标准稠密 Attention 的匹配计算量和权重矩阵大小随序列长度平方增长。`P=8 → 4` 时，含 CLS 的长度从 17 变成 65，权重元素数量比为 $65^2/17^2$。
+TinyViT 的默认路径是 `[B,1,32,32] → [B,16,64]`。空间结构通过 patch 的排列及位置嵌入进入模型。减小 $P$ 会增加 Token 数；在隐藏维度不变时，标准稠密 Attention 的匹配计算量和权重矩阵大小随序列长度平方增长。`P=8 → 4` 时，含 CLS 的长度从 17 变成 65，权重元素数量比为 $65^2/17^2$ 。
 
-来源：[TinyViT][nb-vit] 的 `PatchEmbedding`。这是形状与计算规模推论，不是实际运行时间测量。
+这里 `16` 是 Token 数，`64` 是每个 Token 的特征维度；默认配置下单个 Patch 的原始像素数也为 64，只是数值巧合，改变 Patch 大小不必同时改变隐藏维度。来源：[TinyViT][nb-vit] 的 `PatchEmbedding` 与 [ViT Notes §2][note-vit]。这是形状与计算规模推论，不是实际运行时间测量。
 
 ### II.2 CLS Token 如何得到整张图像的信息？
 
@@ -161,9 +163,17 @@ $$
 
 CLS 是参与双向 Self-Attention 的可学习向量，可以在多层交互中聚合 patch 信息。当前分类头读取最后的 CLS 表示；它不是将所有 patch 简单求均值。实现使用 2 个 Encoder Block、4 个 Head、64 维隐藏特征，并复用 `nn.MultiheadAttention`，不是重新手写一套 Q/K/V 底层算子。
 
+**共享初值不等于共享最终特征。** `cls_token` 是所有图像共用的可学习参数，初始化为零；加入 CLS 位置向量后，进入首层的表示是 $z_{\mathrm{cls}}+e_{\mathrm{pos},0}$ ，通常已非零。之后它读取各图像不同的 Patch 信息，最终表征可以随图像改变，但不保证任意两张图像的表征严格不同。分类代码读取最后一个 Block 的 CLS，再沿其特征维做 LayerNorm；这与先逐 Token 做同一 LayerNorm、再取 CLS 等价。单层 Attention 的一行权重还不是这个最终特征，见 [ViT Notes §3、§7][note-vit]。
+
 **实验观察。** 800 张程序生成条纹图像分为 640 张训练、160 张测试，8 个 epoch 后保存的测试准确率为 1.000。这只支持该合成分布上的分类表现；单个 patch 已含条纹方向信息，所以不能据此证明全局空间推理能力，也不能用去位置嵌入后的表现断言位置编码无用。
 
-CLS 也可关注自身，因此截取“CLS → 图像 patch”的权重后，其总和不一定为 1。热力图不能替代归因实验。来源：[TinyViT][nb-vit] 的训练与 CLS Attention 单元。
+**热力图解释。** 设最后一层第 $h$ 个 Head 的权重为 $A^{(h)}$ ，Token 0 是 CLS， $N_v$ 是 Patch 数；本节未使用 Attention Dropout，因此：
+
+$$
+\sum_{j=1}^{N_v} A^{(h)}_{0j}=1-A^{(h)}_{00}.
+$$
+
+截取 `attention[0, :, 0, 1:]` 后保留各 Head，默认重排为 `[4,4,4]`（Head、网格行、网格列），而非重新归一化到和为 1。当前各 Head 使用独立 colorbar 和自身最小／最大值映射颜色，以观察内部空间变化；跨 Head 比较绝对值需读各自刻度，不能直接比较颜色。颜色变化鲜明可能只对应很小的权重差异，也不能证明 Head 具有独立语义分工。权重还未包含 Value 内容、输出投影、残差与 MLP 的完整作用，热力图不能替代归因实验。来源：[TinyViT][nb-vit] 的训练与 CLS Attention 单元、[ViT Notes §5–7][note-vit]。
 
 ### II.3 Visual Projector 对齐了什么，又没有对齐什么？
 
@@ -185,6 +195,8 @@ $$
 
 当前已演示的连接是“多个视觉特征 → Projector → 与文本 Token 拼接 → 双向 Self-Attention”。多个 Token 保留了空间位置对应的表示槽位，但经过视觉 Attention 后，每个槽位可以包含全局信息，不再只代表孤立 patch。
 
+去掉分类 Head 与导出 Patch Features 也不是同一件事：TinyViT 当前 `forward` 返回分类 logits，可选返回值是 Attention 权重，而非完整 Encoder 特征。用于下游的 Patch Features 应来自编码后的 Token 表征，不能把热力图作为它们的替代品；本项目尚未为该分类器实现这一导出接口。概念区分见 [ViT Notes §7–8][note-vit]，独立的接口演示见 [Visual Token Projection][nb-projector]。
+
 第二章提供另一种接口思路：让某类 Query 通过 Cross-Attention 读取视觉 memory。两种连接都需要明确位置表示、可见性和任务监督；是否共享隐藏宽度还取决于具体模块的输入投影设计。
 
 **Future Topics。** 当前没有训练这两种多模态方案的对照实验。预训练视觉主干、图文训练目标、因果/前缀 Mask、视觉压缩和真实 tokenizer 留待多模态章节；不能把当前拼接实验称作已训练的 VLM。
@@ -194,7 +206,7 @@ $$
 
 ### III.1 为什么可以一步采样 DDPM 的任意噪声阶段？
 
-**数学事实。** 设干净样本为 $x_0$，前向步 $t=1,\ldots,K$：
+**数学事实。** 设干净样本为 $x_0$ ，前向步 $t=1,\ldots,K$ ：
 
 $$
 q(x_t\mid x_{t-1})=\mathcal N(\sqrt{\alpha_t}x_{t-1},\beta_tI),\qquad
@@ -210,9 +222,9 @@ $$
 
 这允许训练时随机抽取一个时间步，直接构造对应输入，不必执行完整前向链。公式给出的是该步的条件边际分布；分别独立生成多个时间点，并不自动构成同一条马尔可夫链轨迹。
 
-**实现约定。** 代码下标 `t=0` 对应公式中的首次加噪步，不是干净 $x_0$。`alpha_bar_prev[0]=1` 对应数学上的 $\bar\alpha_0=1$。
+**实现约定。** 代码下标 `t=0` 对应公式中的首次加噪步，不是干净 $x_0$ 。`alpha_bar_prev[0]=1` 对应数学上的 $\bar\alpha_0=1$ 。
 
-**教学简化。** 线性 beta 端点均为 `1e-4` 和 `0.02`：圆环与 DDPM Policy 的 `K=100` 得到 $\bar\alpha_K\approx0.364$，八簇的 `K=200` 得到约 0.132。末端仍保留信号，用标准高斯初始化反向采样有先验不匹配。改变步数也改变累计噪声，不能当作只改变计算量的公平对照。
+**教学简化。** 线性 beta 端点均为 `1e-4` 和 `0.02`：圆环与 DDPM Policy 的 `K=100` 得到 $\bar\alpha_K\approx0.364$ ，八簇的 `K=200` 得到约 0.132。末端仍保留信号，用标准高斯初始化反向采样有先验不匹配。改变步数也改变累计噪声，不能当作只改变计算量的公平对照。
 
 来源：[圆环实验][nb-ring] / [Notes][note-ring]、[八簇实验][nb-gmm] / [Notes][note-gmm]；数学定义参见 [DDPM 原论文](https://arxiv.org/abs/2006.11239)。
 
@@ -221,12 +233,12 @@ $$
 训练通过已知 $x_0,t,\epsilon$ 构造监督：
 
 $$
-\mathcal L_\epsilon=\mathbb E\left[\|\epsilon_\theta(x_t,t)-\epsilon\|^2\right].
+\mathcal L_\epsilon=\mathbb E\left[\lVert\epsilon_\theta(x_t,t)-\epsilon\rVert^2\right].
 $$
 
 时间输入用于区分不同噪声级别的任务。平方回归的理想解是给定 $(x_t,t)$ 的条件平均噪声，不是恢复每条训练样本唯一、可识别的随机噪声。当前无权 MSE 是简化训练目标，不能直接等同于精确最大似然。
 
-生成时没有真实 $x_0$ 或真实 $\epsilon$。模型预测被代入反向均值，再迭代采样：
+生成时没有真实 $x_0$ 或真实 $\epsilon$ 。模型预测被代入反向均值，再迭代采样：
 
 $$
 \mu_\theta(x_t,t)=\frac{1}{\sqrt{\alpha_t}}
@@ -234,7 +246,7 @@ $$
 \qquad x_{t-1}=\mu_\theta(x_t,t)+\sigma_tz.
 $$
 
-其中 $z\sim\mathcal N(0,I)$，最后一步不再添加随机项。圆环实验在非末步采用 $\sigma_t^2=\beta_t$；八簇与 DDPM Policy 采用：
+其中 $z\sim\mathcal N(0,I)$ ，最后一步不再添加随机项。圆环实验在非末步采用 $\sigma_t^2=\beta_t$ ；八簇与 DDPM Policy 采用：
 
 $$
 \sigma_t^2=\tilde\beta_t=\beta_t\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}.
@@ -246,23 +258,23 @@ $$
 
 ### III.3 Flow Matching 的 Probability Path 与 Velocity Field 是什么关系？
 
-**实现事实。** 当前采用独立端点配对：$x_0\sim p_0$ 为噪声，$x_1\sim p_1$ 为数据；这与 DDPM 中 $x_0$ 表示干净数据的约定不同。令：
+**实现事实。** 当前采用独立端点配对： $x_0\sim p_0$ 为噪声， $x_1\sim p_1$ 为数据；这与 DDPM 中 $x_0$ 表示干净数据的约定不同。令：
 
 $$
 x_\tau=(1-\tau)x_0+\tau x_1,\qquad
 u=x_1-x_0,\qquad \tau\sim U(0,1).
 $$
 
-Probability Path 指每个 $\tau$ 上随机变量 $x_\tau$ 的分布 $p_\tau$；给定端点对后的线段是构造它的一种方式。网络只接收 $(x_\tau,\tau)$，优化：
+Probability Path 指每个 $\tau$ 上随机变量 $x_\tau$ 的分布 $p_\tau$ ；给定端点对后的线段是构造它的一种方式。网络只接收 $(x_\tau,\tau)$ ，优化：
 
 $$
-\mathcal L_{\mathrm{FM}}=\mathbb E\left[\|v_\theta(x_\tau,\tau)-u\|^2\right],\qquad
+\mathcal L_{\mathrm{FM}}=\mathbb E\left[\lVert v_\theta(x_\tau,\tau)-u\rVert^2\right],\qquad
 v^*(x,\tau)=\mathbb E[u\mid x_\tau=x,\tau].
 $$
 
-**数学推论。** 条件期望来自平方回归的最优解。对某一对端点，$u$ 是常量；但同一位置可能由不同样本对到达，所以边际速度一般随位置和时间改变。训练线段也不意味着学习后 ODE 的每条轨迹都是相同的线段。
+**数学推论。** 条件期望来自平方回归的最优解。对某一对端点， $u$ 是常量；但同一位置可能由不同样本对到达，所以边际速度一般随位置和时间改变。训练线段也不意味着学习后 ODE 的每条轨迹都是相同的线段。
 
-一维实验取 $p_0=\mathcal N(0,1)$、$p_1=\mathcal N(4,0.5^2)$。由独立高斯变量线性组合可得：
+一维实验取 $p_0=\mathcal N(0,1)$ 、 $p_1=\mathcal N(4,0.5^2)$ 。由独立高斯变量线性组合可得：
 
 $$
 x_\tau\sim\mathcal N\left(4\tau,(1-\tau)^2+0.25\tau^2\right).
@@ -281,11 +293,11 @@ $$
 $$
 
 $$
-x^{(k+1)}=x^{(k)}+\Delta\tau\,v_\theta(x^{(k)},k/N),\qquad
+x^{(k+1)}=x^{(k)}+\Delta\tau v_\theta(x^{(k)},k/N),\qquad
 \Delta\tau=1/N.
 $$
 
-当前用显式 Euler，循环 $k=0,\ldots,N-1$。一维实验默认 100 步，Policy 默认 50 步。对于固定模型、条件和初始噪声，算法不再额外抽取每一步的随机扰动；不同初始噪声仍会得到不同生成样本。
+当前用显式 Euler，循环 $k=0,\ldots,N-1$ 。一维实验默认 100 步，Policy 默认 50 步。对于固定模型、条件和初始噪声，算法不再额外抽取每一步的随机扰动；不同初始噪声仍会得到不同生成样本。
 
 增加步数主要控制数值离散误差，不能消除速度场建模误差。端点分布逼近还依赖训练质量及流的适用条件，不能只凭写出 ODE 就保证生成正确。
 
@@ -316,7 +328,7 @@ $$
 
 训练数据是起点 $s$ 到目标 $g$ 的线性插值，内部 waypoint 加标准差 0.02 的噪声，首尾噪声为零。两本使用相同的数据分布，但独立抽样。模型将片段展平，与时间嵌入、条件拼接，再输出 `[B,H,2]`。
 
-DDPM 学习 $\epsilon_\theta(A_t,t,o)$；FM 学习 $v_\theta(A_\tau,\tau,o)$。条件 $o$ 保持干净，不被扩散或流匹配插值；FM 的干净轨迹用于构造中间状态和速度监督，但不是额外直接输入。对整段轨迹采样高斯噪声意味着 $\operatorname{vec}(\epsilon)\sim\mathcal N(0,I_{2H})$，而不是非方阵“协方差”。
+DDPM 学习 $\epsilon_\theta(A_t,t,o)$ ；FM 学习 $v_\theta(A_\tau,\tau,o)$ 。条件 $o$ 保持干净，不被扩散或流匹配插值；FM 的干净轨迹用于构造中间状态和速度监督，但不是额外直接输入。对整段轨迹采样高斯噪声意味着 $\operatorname{vec}(\epsilon)\sim\mathcal N(0,I_{2H})$ ，而不是非方阵“协方差”。
 
 需要分清三个轴：
 
@@ -326,7 +338,7 @@ DDPM 学习 $\epsilon_\theta(A_t,t,o)$；FM 学习 $v_\theta(A_\tau,\tau,o)$。�
 | $t$ 或 $\tau$ | 生成算法内部的阶段 | 不是机器人已经执行到的物理时间 |
 | 真实执行与重新观测的时刻 | 闭环控制中的时间 | 当前实验没有模拟这一循环 |
 
-两种采样都反复更新整段片段，不是按自回归顺序逐个生成 waypoint。固定长度 MLP 对不同展平槽位有不同参数，因此这里不依赖 Transformer 位置嵌入来区分动作顺序，也不能直接复用同一权重处理任意 $H$。
+两种采样都反复更新整段片段，不是按自回归顺序逐个生成 waypoint。固定长度 MLP 对不同展平槽位有不同参数，因此这里不依赖 Transformer 位置嵌入来区分动作顺序，也不能直接复用同一权重处理任意 $H$ 。
 
 **教学简化。** 输出是二维坐标，尚不是速度、关节或力矩指令。随机采样带来变化，但数据只有直线附近的小扰动，不会凭空学到左右绕障的多峰策略。八簇 DDPM 的“多模态”指概率分布多峰；视觉—语言的“多模态”指输入信息种类，两个词义不可混用。
 
@@ -382,7 +394,7 @@ DDPM 学习 $\epsilon_\theta(A_t,t,o)$；FM 学习 $v_\theta(A_\tau,\tau,o)$。�
 
 **Future Topics / 研究问题。** 本仓库的 WAM 路线关注“动作产生什么世界变化，以及这种预测能否帮助决策”。目前没有世界状态转移数据、世界模型或联合训练实现。
 
-可先区分两类建模目标：策略产生动作，世界模型预测给定动作后的状态或观测变化。用 $s_r$ 表示某种状态表征，$a_r$ 表示动作，$\ell$ 表示指令：
+可先区分两类建模目标：策略产生动作，世界模型预测给定动作后的状态或观测变化。用 $s_r$ 表示某种状态表征， $a_r$ 表示动作， $\ell$ 表示指令：
 
 $$
 \text{策略目标： }p_\theta(A\mid o,\ell),\qquad
@@ -422,6 +434,7 @@ $$
 | KB-Q07 | 条纹分类能否验证对全局位置关系的理解？ | Partially Resolved | 局部 patch 已有分类线索；需依赖布局的数据和位置机制对照，见 II.2 |
 | KB-Q08 | 如何把视觉/语言条件接入动作生成并形成闭环？ | Open | 各章模块独立，尚缺共享训练数据和执行环境，见 IV.1–2 |
 | KB-Q09 | 世界预测能否帮助动作选择，如何排除只学视觉相关性？ | Open | 尚无 WAM 实现；需动作条件干预及闭环决策对照，见 IV.3 |
+| KB-Q10 | 逐 Head 热力图能否说明各 Head 的语义分工或最终分类贡献？ | Partially Resolved | 已厘清权重、Value 聚合、最终 CLS 及色标的区别；缺 Head 消融、输入干预等归因证据，见 I.3、II.2 和 ViT Notes §5–7 |
 
 ### 问题演进记录
 
@@ -432,6 +445,7 @@ $$
 | 2026-10-11 | KB-Q01、Q04、Q08、Q09 | 建档为 Open：现有材料明确缺少所需的消融、共同基准或系统实现 |
 | 2026-10-11 | KB-Q02、Q03、Q07 | 建档为 Partially Resolved：已有接口断言、调度计算或任务分析，但未覆盖完整问题 |
 | 2026-10-11 | KB-Q05、Q06 | 建档为 Resolved（限定当前实现）：依据采样代码、数据构造及已保存输出 |
+| 2026-10-13 | KB-Q10 | 建档为 Partially Resolved：ViT Notes 与 `faff6d6` 的逐 Head 输出支持权重读取、拼接机制和色标解释；没有新增语义分工或分类贡献实验 |
 
 后续记录格式：`日期 / 问题 ID / 原状态 → 新状态（或状态不变） / 新证据 / 仍有的边界`。被否定的解释要记录修正原因；不要删掉问题或覆盖旧证据。新问题放入本表，核心答案融入相关 Part，避免末尾不断堆积独立总结。
 
@@ -441,6 +455,7 @@ $$
 [nb-encdec]: 02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb
 [note-encdec]: 02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.md
 [nb-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.ipynb
+[note-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.md
 [nb-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.ipynb
 [nb-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb
 [note-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md
