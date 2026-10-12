@@ -96,7 +96,7 @@ $$
 | Causal Mask | 下一 Token 训练不能读取未来目标 | 第一章与第二章 Decoder Self-Attention：屏蔽 `j > i` 的分数，再 Softmax |
 | Key Padding Mask | 有效 Query 不应从填充 Token 读取内容 | 第三章投影实验：`key_padding_mask=True` 屏蔽相应 Key/Value |
 
-Padding Mask 不会自动将填充位置的 Query 输出清零；逐 Token 损失还需单独排除填充位置。第二章使用固定长度数据，没有实现 Padding Mask。Cross-Attention 中已给定完整源序列，当前实验不需要对源位置施加因果下三角限制。
+Padding Mask 不会自动将填充位置的 Query 输出清零；逐 Token 损失或池化还需单独排除填充位置。投影实验的布尔 Mask 为 `[B,19]`，沿 Head 与 Query 维广播，屏蔽的是 Key 列；第二个样本的一个 PAD Key 对应 `4×19=76` 个零权重，PAD Query 行仍可读取有效 Keys。图解与形状区别见 [Visual Token Projection Notes §5][note-projector]。第二章使用固定长度数据，没有实现 Padding Mask。Cross-Attention 中已给定完整源序列，当前实验不需要对源位置施加因果下三角限制。
 
 **实验观察。** 第一章修改未来 Token 后，前三个位置 logits 最大差异为 0，验证了该输入上的因果隔离。投影实验断言 Padding Key 对应的注意力权重为 0。前者检查信息泄漏，后者检查填充隔离，都不评价任务语义。来源：[Attention][nb-attention]、[Encoder–Decoder][nb-encdec]、[Visual Token Projection][nb-projector]。
 
@@ -191,15 +191,25 @@ $$
 
 维度相同意味着后续算子可以接收两类表示，不意味着它们已经具有共同语义。当前视觉编码器、文本 Embedding、Projector 和融合 Attention 均随机初始化；没有真实 tokenizer、语义训练、文本位置编码或自回归语言解码器。
 
-**实验观察。** 人工标量输出反传得到非零 Projector 梯度（保存值 9.463445），说明文本位置的输出可以通过 Attention 依赖视觉投影。它不是图文对齐指标，也没有通过优化器训练出语义关系。来源：[Visual Token Projection][nb-projector] 的 `visual_projector`、`combined` 和梯度检查单元。
+**实验观察。** 人工标量探针只作用于一个 Text Token 的输出，仍可沿 Visual Keys / Values 的路径传回共享 Projector；这与 ViT 只监督 CLS、其余 Token 参与计算的机制相通。[保存输出 `9a85235`](https://github.com/Maple-Ze/Transformer-to-VLA/commit/9a85235) 中，权重与梯度形状均为 `[96,64]`，梯度 Frobenius 范数为 9.463445，汇总了 6144 个权重偏导数，不包含 96 个 Bias 梯度。它验证本次输入和探针的非零参数依赖；没有优化器更新，也不是图文对齐指标。若某次梯度为零，也不能仅据此断言图上没有路径，仍需排查局部导数与抵消。来源：[Visual Token Projection][nb-projector] 的梯度检查、[Notes §8][note-projector] 的链式法则与范数解释。
 
 ### II.4 Vision Encoder 如何连接后续多模态模型？
 
-当前已演示的连接是“多个视觉特征 → Projector → 与文本 Token 拼接 → 双向 Self-Attention”。多个 Token 保留了空间位置对应的表示槽位，但经过视觉 Attention 后，每个槽位可以包含全局信息，不再只代表孤立 patch。
+当前已演示的连接是“多个视觉特征 → Projector → 与文本 Token 拼接 → 双向 Self-Attention”。视觉侧使用完整 Encoder Layer；融合侧仅有 `nn.MultiheadAttention`，没有附加 MLP、LayerNorm 或残差，不能把两者视作相同结构。多个 Token 保留了空间位置对应的表示槽位，但经过视觉 Attention 后，每个槽位可以包含全局信息，不再只代表孤立 patch。
 
 去掉分类 Head 与导出 Patch Features 也不是同一件事：TinyViT 当前 `forward` 返回分类 logits，可选返回值是 Attention 权重，而非完整 Encoder 特征。用于下游的 Patch Features 应来自编码后的 Token 表征，不能把热力图作为它们的替代品；本项目尚未为该分类器实现这一导出接口。概念区分见 [ViT Notes §7–8][note-vit]，独立的接口演示见 [Visual Token Projection][nb-projector]。
 
-第二章提供另一种接口思路：让某类 Query 通过 Cross-Attention 读取视觉 memory。两种连接都需要明确位置表示、可见性和任务监督；是否共享隐藏宽度还取决于具体模块的输入投影设计。
+第二章提供另一种接口思路：让某类 Query 通过 Cross-Attention 读取视觉 memory。联合 Self-Attention 的 Text → Visual 子块可以承担跨模态读取，但它不是一个独立的 Cross-Attention 层。两种连接都需要明确位置表示、可见性和任务监督；是否共享隐藏宽度还取决于具体模块的输入投影设计。
+
+**Attention Mass 的计数基线。** 对固定样本的 Text Query $i$ 与 Head $h$ ，视觉 Keys 为索引 $0,\ldots,N_v-1$ ，有效文本 Key 数为 $L_{\mathrm{valid}}$ 。在本实验双向可见、视觉 Keys 全部有效且 Attention Dropout 为零的条件下：
+
+$$
+M_{\mathrm{visual}}^{(h)}=\sum_{j=0}^{N_v-1}A_{ij}^{(h)},\qquad
+M_{\mathrm{visual}}^{(h)}+M_{\mathrm{text}}^{(h)}=1,\qquad
+M_{\mathrm{uniform}}=\frac{N_v}{N_v+L_{\mathrm{valid}}}.
+$$
+
+前两式描述实际权重分配，最后一式是假设所有有效 Key 均匀分配时的参照值，并非随机初始化网络的必然输出。16 个视觉 Key、3 个文本 Key 时基线为 `16/19≈0.8421`；屏蔽一个 PAD 后变为 `16/18≈0.8889`。因此较大的视觉权重总和可能仅来自视觉 Token 较多。它还不是信息量或因果贡献占比，解释时需结合 Value、输出投影及干预证据。与 II.2 的 CLS → Patch 图相同，本实验保留每个 Head 的原始权重，独立色标只调整颜色映射。定义、示意图与本次输出的区分见 [Projection Notes §6–7][note-projector]。
 
 **Future Topics。** 当前没有训练这两种多模态方案的对照实验。预训练视觉主干、图文训练目标、因果/前缀 Mask、视觉压缩和真实 tokenizer 留待多模态章节；不能把当前拼接实验称作已训练的 VLM。
 
@@ -428,7 +438,7 @@ $$
 | ID | 技术问题 | 状态 | 已有依据与下一步 |
 | --- | --- | --- | --- |
 | KB-Q01 | 当前实验能证明 Attention 对历史依赖的贡献吗？ | Open | 数字加一不需要历史；翻转尚无无 Attention 基线。需历史依赖任务、基线和消融，见 I.6 |
-| KB-Q02 | 视觉与文本维度对齐后，何时才算学到语义对齐？ | Partially Resolved | 形状、Padding 和梯度通路已验证；缺真实监督与图文任务评估，见 II.3–4 |
+| KB-Q02 | 视觉与文本维度对齐后，何时才算学到语义对齐？ | Partially Resolved | 已解释形状、Padding、梯度通路及 Attention Mass 的计数基线；缺真实监督与图文任务评估，见 II.3–4、Projection Notes |
 | KB-Q03 | 短 DDPM 链的先验不匹配对结果影响多大？ | Partially Resolved | 累计信号非零已确认；还需控制调度、训练预算和评估分布的比较，见 III.1 |
 | KB-Q04 | DDPM Policy 与 FM Policy 在相同预算下如何取舍？ | Open | 当前预算和评价集不同，不能排序；需共同协议，见 III.7 |
 | KB-Q05 | 条件输入是否硬性保证生成端点相等？ | Resolved | 当前采样器无端点投影；保存输出有误差。结论仅为“条件输入本身不构成硬约束”，见 III.7 |
@@ -448,6 +458,7 @@ $$
 | 2026-10-11 | KB-Q02、Q03、Q07 | 建档为 Partially Resolved：已有接口断言、调度计算或任务分析，但未覆盖完整问题 |
 | 2026-10-11 | KB-Q05、Q06 | 建档为 Resolved（限定当前实现）：依据采样代码、数据构造及已保存输出 |
 | 2026-10-13 | KB-Q10 | 建档为 Partially Resolved：ViT Notes 与 `faff6d6` 的逐 Head 输出支持权重读取、拼接机制和色标解释；没有新增语义分工或分类贡献实验 |
+| 2026-10-13 | KB-Q02 | 保持 Partially Resolved：Projection Notes 与 `9a85235` 输出补充共享权重的梯度形状、Mask 广播和 Attention Mass 的均匀基线；这些证据仍不能替代语义训练或任务评估 |
 
 后续记录格式：`日期 / 问题 ID / 原状态 → 新状态（或状态不变） / 新证据 / 仍有的边界`。被否定的解释要记录修正原因；不要删掉问题或覆盖旧证据。新问题放入本表，核心答案融入相关 Part，避免末尾不断堆积独立总结。
 
@@ -459,6 +470,7 @@ $$
 [nb-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.ipynb
 [note-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.md
 [nb-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.ipynb
+[note-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.md
 [nb-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb
 [note-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md
 [nb-gmm]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb
