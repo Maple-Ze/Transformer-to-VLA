@@ -33,7 +33,7 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 | Stage | Topic | Focus | Status |
 | --- | --- | --- | --- |
 | 01 | Attention Fundamentals | Q/K/V, scaled dot-product attention, multi-head attention, causal masking, embeddings, Transformer blocks, next-token prediction, autoregressive generation | ✅ Completed |
-| 02 | Encoder-Decoder Transformer | Cross-attention, post-layer normalization, sinusoidal positional encoding, teacher forcing, sequence-to-sequence reversal | 🚧 In Progress |
+| 02 | Encoder-Decoder Transformer | Cross-attention, post-layer normalization, sinusoidal positional encoding, teacher forcing, sequence-to-sequence reversal | ✅ Completed |
 | 03 | [Vision Transformers](03_Vision_Transformers/) | Patch/CLS tokens, positional embeddings, image classification, visual projection | 🚧 In Progress |
 | 04 | [Diffusion and Flow Models](04_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
 | 05 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
