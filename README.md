@@ -35,10 +35,12 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 | 01 | Attention Fundamentals | Q/K/V, scaled dot-product attention, multi-head attention, causal masking, embeddings, Transformer blocks, next-token prediction, autoregressive generation | ✅ Completed |
 | 02 | Encoder-Decoder Transformer | Cross-attention, post-layer normalization, sinusoidal positional encoding, teacher forcing, sequence-to-sequence reversal | ✅ Completed |
 | 03 | [Vision Transformers](03_Vision_Transformers/) | Patch/CLS tokens, positional embeddings, image classification, visual projection, joint attention, padding masks | ✅ Completed |
-| 04 | [Diffusion and Flow Models](04_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
-| 05 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
+| 04 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
+| 05 | [Diffusion and Flow Models](05_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
 | 06 | Vision-Language-Action | From multimodal representations to robot action generation | 📋 Planned |
 | 07 | World-Action Models (WAM) | World dynamics prediction and action generation | 📋 Planned |
+
+Stages 03–04 connect visual tokens with multimodal fusion; Stage 05 develops generative action models before their integration in Stage 06. The current Stage 05 experiments can also be studied independently of Stage 04.
 
 ## Implementations & Notes
 
@@ -52,15 +54,15 @@ Explore the [Knowledge Base](KNOWLEDGE_BASE.md) for core concepts, cross-chapter
 | 02 · Encoder-Decoder Transformer | [Notebook](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | [Notes](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
 | 03.1 · ViT from Scratch | [Notebook](03_Vision_Transformers/01_ViT_From_Scratch.ipynb) | [Notes](03_Vision_Transformers/01_ViT_From_Scratch.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/03_Vision_Transformers/01_ViT_From_Scratch.ipynb) |
 | 03.2 · Visual Token Projection | [Notebook](03_Vision_Transformers/02_Visual_Token_Projection.ipynb) | [Notes](03_Vision_Transformers/02_Visual_Token_Projection.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/03_Vision_Transformers/02_Visual_Token_Projection.ipynb) |
-| 04.1.1 · DDPM: 2D Ring | [Notebook](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) | [Notes](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) |
-| 04.1.2 · DDPM: 2D Gaussian Mixture | [Notebook](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) | [Notes](04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) |
-| 04.2.1 · Flow Matching: 1D Gaussian | [Notebook](04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) | [Notes](04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) |
-| 04.3.1 · DDPM Policy | [Notebook](04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) | [Notes](04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) |
-| 04.3.2 · Flow Matching Policy | [Notebook](04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) |
+| 05.1.1 · DDPM: 2D Ring | [Notebook](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) | [Notes](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) |
+| 05.1.2 · DDPM: 2D Gaussian Mixture | [Notebook](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) | [Notes](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) |
+| 05.2.1 · Flow Matching: 1D Gaussian | [Notebook](05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) | [Notes](05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) |
+| 05.3.1 · DDPM Policy | [Notebook](05_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) | [Notes](05_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb) |
+| 05.3.2 · Flow Matching Policy | [Notebook](05_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) |
 
 **Stage 03** covers a ViT classifier trained on synthetic stripes and a visual projection experiment with joint image/text attention, padding masks, per-head visualization, and gradient checks. Both notebooks have illustrated notes and use PyTorch attention/encoder components. The projection experiment demonstrates an untrained interface; it does not train visual-language semantic alignment.
 
-**Stage 04** progresses from DDPM noise prediction on a ring and an eight-mode mixture, to velocity-field learning with Euler integration, then start/goal-conditioned 2D waypoint generation. The two policy examples use the same synthetic data distribution and produce `[B, H, 2]` trajectories, with `H=16` by default. They demonstrate generative policy mechanisms using MLPs; DiT, visual conditioning, and robot execution remain future extensions.
+**Stage 05** progresses from DDPM noise prediction on a ring and an eight-mode mixture, to velocity-field learning with Euler integration, then start/goal-conditioned 2D waypoint generation. The two policy examples use the same synthetic data distribution and produce `[B, H, 2]` trajectories, with `H=16` by default. They demonstrate generative policy mechanisms using MLPs; DiT, visual conditioning, and robot execution remain future extensions.
 
 Follow the numbered notebooks within each available stage. Use the notes to interpret results, then vary attention heads, masks, noise schedules, or ODE steps to compare behavior.
 
@@ -102,7 +104,7 @@ Transformer-to-VLA/
 ├── 03_Vision_Transformers/
 │   ├── 01_ViT_From_Scratch.ipynb
 │   └── 02_Visual_Token_Projection.ipynb
-└── 04_Diffusion_and_Flow_Models/
+└── 05_Diffusion_and_Flow_Models/
     ├── 01_DDPM_Fundamentals/
     │   ├── 01_2D_Ring.ipynb
     │   └── 02_2D_Gaussian_Mixture.ipynb

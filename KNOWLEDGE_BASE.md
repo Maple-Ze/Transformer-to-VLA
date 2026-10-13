@@ -387,7 +387,7 @@ DDPM 学习 $\epsilon_\theta(A_t,t,o)$ ；FM 学习 $v_\theta(A_\tau,\tau,o)$ �
 | Patch Tokens、Visual Projector | 图像表示如何进入兼容的 Token 接口 | 分类器与投影实验相互独立；后者未做语义训练 |
 | DDPM / FM 条件片段生成 | 如何从噪声联合生成连续输出 | 条件只有二维起终点，没有视觉或语言输入 |
 
-这些是已经分别运行的模块。仓库没有把第三章编码器接入第四章 Policy，也没有端到端 VLA 训练。
+这些是已经分别运行的模块。仓库没有把第三章编码器接入第五章 Policy，也没有端到端 VLA 训练。
 
 **Future Topics：待实现的连接方案。** 下列流程描述后续需要明确的接口，不代表已有计算图：
 
@@ -481,12 +481,12 @@ $$
 [note-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.md
 [nb-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.ipynb
 [note-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.md
-[nb-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb
-[note-ring]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md
-[nb-gmm]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb
-[note-gmm]: 04_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md
-[nb-fm]: 04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb
-[note-fm]: 04_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md
-[nb-ddpm-policy]: 04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb
-[note-ddpm-policy]: 04_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.md
-[nb-fm-policy]: 04_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb
+[nb-ring]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb
+[note-ring]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md
+[nb-gmm]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb
+[note-gmm]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md
+[nb-fm]: 05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb
+[note-fm]: 05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md
+[nb-ddpm-policy]: 05_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.ipynb
+[note-ddpm-policy]: 05_Diffusion_and_Flow_Models/03_Generative_Policies/01_DDPM_Policy.md
+[nb-fm-policy]: 05_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb

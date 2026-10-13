@@ -663,7 +663,7 @@ Transformer
 Task\ Specific\ Head
 $$
 
-这种联系仅指“将表征用于任务输出”。LM Head 通常一次线性映射得到词表 logits；第四章的 DDPM / Flow Matching Policy 则需要条件网络与多步采样，不能把 Action Head / Action Expert 一概等同于线性层。视觉、语言与动作的端到端连接仍是本项目的 Future Topics。
+这种联系仅指“将表征用于任务输出”。LM Head 通常一次线性映射得到词表 logits；第五章的 DDPM / Flow Matching Policy 则需要条件网络与多步采样，不能把 Action Head / Action Expert 一概等同于线性层。视觉、语言与动作的端到端连接仍是本项目的 Future Topics。
 
 ------------------------------------------------------------------------
 
