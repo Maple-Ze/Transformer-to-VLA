@@ -1,6 +1,6 @@
 # 03-02 · Visual Token Projection — 学习笔记
 
-[项目首页](../README.md) · [实验 Notebook](02_Visual_Token_Projection.ipynb) · [上一节笔记](01_ViT_From_Scratch.md) · [下一章规划](../README.md#learning-roadmap) · [知识库](../KNOWLEDGE_BASE.md#part-ii)
+[项目首页](../README.md) · [实验 Notebook](02_Visual_Token_Projection.ipynb) · [上一节笔记](01_ViT_From_Scratch.md) · [下一章](../04_Multimodal_Transformer/01_Multimodal_Tokenization.ipynb) · [知识库](../KNOWLEDGE_BASE.md#part-ii)
 
 本节讨论 Visual Tokens 与 Text Tokens 的维度对齐、联合 Attention、Padding Mask、注意力分析与梯度传递。
 

@@ -35,7 +35,7 @@ Diffusion and flow matching experiments introduce generative modeling and condit
 | 01 | Attention Fundamentals | Q/K/V, scaled dot-product attention, multi-head attention, causal masking, embeddings, Transformer blocks, next-token prediction, autoregressive generation | ✅ Completed |
 | 02 | Encoder-Decoder Transformer | Cross-attention, post-layer normalization, sinusoidal positional encoding, teacher forcing, sequence-to-sequence reversal | ✅ Completed |
 | 03 | [Vision Transformers](03_Vision_Transformers/) | Patch/CLS tokens, positional embeddings, image classification, visual projection, joint attention, padding masks | ✅ Completed |
-| 04 | Multimodal Transformer | Vision and language tokens, multimodal fusion | 📋 Planned |
+| 04 | [Multimodal Transformer](04_Multimodal_Transformer/) | Token masks, paired projection learning, joint/cross-attention, synthetic visual question answering | 🚧 In Progress |
 | 05 | [Diffusion and Flow Models](05_Diffusion_and_Flow_Models/) | DDPM fundamentals, flow matching, conditional trajectory generation | 🚧 In Progress |
 | 06 | Vision-Language-Action | From multimodal representations to robot action generation | 📋 Planned |
 | 07 | World-Action Models (WAM) | World dynamics prediction and action generation | 📋 Planned |
@@ -54,6 +54,10 @@ Explore the [Knowledge Base](KNOWLEDGE_BASE.md) for core concepts, cross-chapter
 | 02 · Encoder-Decoder Transformer | [Notebook](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) | [Notes](02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/02_Encoder_Decoder_Transformer/02_Encoder_Decoder_Transformer.ipynb) |
 | 03.1 · ViT from Scratch | [Notebook](03_Vision_Transformers/01_ViT_From_Scratch.ipynb) | [Notes](03_Vision_Transformers/01_ViT_From_Scratch.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/03_Vision_Transformers/01_ViT_From_Scratch.ipynb) |
 | 03.2 · Visual Token Projection | [Notebook](03_Vision_Transformers/02_Visual_Token_Projection.ipynb) | [Notes](03_Vision_Transformers/02_Visual_Token_Projection.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/03_Vision_Transformers/02_Visual_Token_Projection.ipynb) |
+| 04.1 · Multimodal Tokenization | [Notebook](04_Multimodal_Transformer/01_Multimodal_Tokenization.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Multimodal_Transformer/01_Multimodal_Tokenization.ipynb) |
+| 04.2 · Visual-Language Projection | [Notebook](04_Multimodal_Transformer/02_Visual_Language_Projection.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Multimodal_Transformer/02_Visual_Language_Projection.ipynb) |
+| 04.3 · Cross-Attention and Fusion | [Notebook](04_Multimodal_Transformer/03_Cross_Attention_and_Fusion.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Multimodal_Transformer/03_Cross_Attention_and_Fusion.ipynb) |
+| 04.4 · Mini Multimodal Transformer | [Notebook](04_Multimodal_Transformer/04_Mini_Multimodal_Transformer.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/04_Multimodal_Transformer/04_Mini_Multimodal_Transformer.ipynb) |
 | 05.1.1 · DDPM: 2D Ring | [Notebook](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) | [Notes](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb) |
 | 05.1.2 · DDPM: 2D Gaussian Mixture | [Notebook](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) | [Notes](05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb) |
 | 05.2.1 · Flow Matching: 1D Gaussian | [Notebook](05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) | [Notes](05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.md) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/02_Flow_Matching/01_1D_Gaussian.ipynb) |
@@ -61,6 +65,8 @@ Explore the [Knowledge Base](KNOWLEDGE_BASE.md) for core concepts, cross-chapter
 | 05.3.2 · Flow Matching Policy | [Notebook](05_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) | — | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Maple-Ze/Transformer-to-VLA/blob/main/05_Diffusion_and_Flow_Models/03_Generative_Policies/02_Flow_Matching_Policy.ipynb) |
 
 **Stage 03** covers a ViT classifier trained on synthetic stripes and a visual projection experiment with joint image/text attention, padding masks, per-head visualization, and gradient checks. Both notebooks have illustrated notes and use PyTorch attention/encoder components. The projection experiment demonstrates an untrained interface; it does not train visual-language semantic alignment.
+
+**Stage 04** moves from token visibility and learned projection to attention fusion and a trainable image/question classifier. Experiments use synthetic data, held-out evaluation, and input interventions; attention visualizations retain individual heads. The final model answers left/right color questions, without pretrained VLMs or language generation.
 
 **Stage 05** progresses from DDPM noise prediction on a ring and an eight-mode mixture, to velocity-field learning with Euler integration, then start/goal-conditioned 2D waypoint generation. The two policy examples use the same synthetic data distribution and produce `[B, H, 2]` trajectories, with `H=16` by default. They demonstrate generative policy mechanisms using MLPs; DiT, visual conditioning, and robot execution remain future extensions.
 
@@ -104,6 +110,11 @@ Transformer-to-VLA/
 ├── 03_Vision_Transformers/
 │   ├── 01_ViT_From_Scratch.ipynb
 │   └── 02_Visual_Token_Projection.ipynb
+├── 04_Multimodal_Transformer/
+│   ├── 01_Multimodal_Tokenization.ipynb
+│   ├── 02_Visual_Language_Projection.ipynb
+│   ├── 03_Cross_Attention_and_Fusion.ipynb
+│   └── 04_Mini_Multimodal_Transformer.ipynb
 └── 05_Diffusion_and_Flow_Models/
     ├── 01_DDPM_Fundamentals/
     │   ├── 01_2D_Ring.ipynb

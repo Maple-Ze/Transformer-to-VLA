@@ -187,15 +187,19 @@ Z'_v=Z_vW_p^\top+b_p\in\mathbb R^{B\times N_v\times D_l},
 \quad W_p\in\mathbb R^{D_l\times D_v}.
 $$
 
-当前实验从 `D_v=64` 投影到 `D_l=96`，随后沿序列维拼接视觉与文本 Token：`[B,16,96] + [B,3,96] → [B,19,96]`。这里的 `+` 表示拼接两个序列，不是逐元素相加；投影本身没有压缩视觉 Token 数量。
+第三章接口实验从 `D_v=64` 投影到 `D_l=96`，随后沿序列维拼接视觉与文本 Token：`[B,16,96] + [B,3,96] → [B,19,96]`。这里的 `+` 表示拼接两个序列，不是逐元素相加；投影本身没有压缩视觉 Token 数量。
 
-维度相同意味着后续算子可以接收两类表示，不意味着它们已经具有共同语义。当前视觉编码器、文本 Embedding、Projector 和融合 Attention 均随机初始化；没有真实 tokenizer、语义训练、文本位置编码或自回归语言解码器。
+维度相同意味着后续算子可以接收两类表示，不意味着它们已经具有共同语义。第三章实验的视觉编码器、文本 Embedding、Projector 和融合 Attention 均随机初始化；没有真实 tokenizer、语义训练、文本位置编码或自回归语言解码器。
 
 **实验观察。** 人工标量探针只作用于一个 Text Token 的输出，仍可沿 Visual Keys / Values 的路径传回共享 Projector；这与 ViT 只监督 CLS、其余 Token 参与计算的机制相通。[保存输出 `9a85235`](https://github.com/Maple-Ze/Transformer-to-VLA/commit/9a85235) 中，权重与梯度形状均为 `[96,64]`，梯度 Frobenius 范数为 9.463445，汇总了 6144 个权重偏导数，不包含 96 个 Bias 梯度。它验证本次输入和探针的非零参数依赖；没有优化器更新，也不是图文对齐指标。若某次梯度为零，也不能仅据此断言图上没有路径，仍需排查局部导数与抵消。来源：[Visual Token Projection][nb-projector] 的梯度检查、[Notes §8][note-projector] 的链式法则与范数解释。
 
+**配对监督能增加什么证据？** 第四章 [Projector 实验][nb-mm-projection] 令共同因素 $s\in\mathbb R^8$ 经过两个固定线性映射及独立噪声，得到 32 维与 48 维配对特征。只训练线性 Projector，比较相同初始化、批次和预算下的正确配对与固定错配监督。该问题被刻意构造为线性可解；它证明的范围是合成特征映射，不是自然图文语义。
+
+**实验观察。** seed 42、CUDA、512 个训练对、400 步后，在独立的 128 个测试对上，正确配对模型 Recall@1 为 1.000，未训练模型为 0，错配模型为 0.0078125；正确配对测试 MSE 约为 0.000612。这些数值来自本节已保存输出，只适用于固定候选池与当前噪声设置。线性层可以学习映射；“随机投影不保证语义对齐”不等于“线性层只能改变维度”。
+
 ### II.4 Vision Encoder 如何连接后续多模态模型？
 
-当前已演示的连接是“多个视觉特征 → Projector → 与文本 Token 拼接 → 双向 Self-Attention”。视觉侧使用完整 Encoder Layer；融合侧仅有 `nn.MultiheadAttention`，没有附加 MLP、LayerNorm 或残差，不能把两者视作相同结构。多个 Token 保留了空间位置对应的表示槽位，但经过视觉 Attention 后，每个槽位可以包含全局信息，不再只代表孤立 patch。
+第三章演示的连接是“多个视觉特征 → Projector → 与文本 Token 拼接 → 双向 Self-Attention”。视觉侧使用完整 Encoder Layer；融合侧仅有 `nn.MultiheadAttention`，没有附加 MLP、LayerNorm 或残差，不能把两者视作相同结构。多个 Token 保留了空间位置对应的表示槽位，但经过视觉 Attention 后，每个槽位可以包含全局信息，不再只代表孤立 patch。
 
 去掉分类 Head 与导出 Patch Features 也不是同一件事：TinyViT 当前 `forward` 返回分类 logits，可选返回值是 Attention 权重，而非完整 Encoder 特征。用于下游的 Patch Features 应来自编码后的 Token 表征，不能把热力图作为它们的替代品；本项目尚未为该分类器实现这一导出接口。概念区分见 [ViT Notes §7–8][note-vit]，独立的接口演示见 [Visual Token Projection][nb-projector]。
 
@@ -211,7 +215,21 @@ $$
 
 前两式描述实际权重分配，最后一式是假设所有有效 Key 均匀分配时的参照值，并非随机初始化网络的必然输出。16 个视觉 Key、3 个文本 Key 时基线为 `16/19≈0.8421`；屏蔽一个 PAD 后变为 `16/18≈0.8889`。因此较大的视觉权重总和可能仅来自视觉 Token 较多。它还不是信息量或因果贡献占比，解释时需结合 Value、输出投影及干预证据。与 II.2 的 CLS → Patch 图相同，本实验保留每个 Head 的原始权重，独立色标只调整颜色映射。定义、示意图与本次输出的区分见 [Projection Notes §6–7][note-projector]。
 
-**Future Topics。** 当前没有训练这两种多模态方案的对照实验。预训练视觉主干、图文训练目标、因果/前缀 Mask、视觉压缩和真实 tokenizer 留待多模态章节；不能把当前拼接实验称作已训练的 VLM。
+**两种融合的受控比较。** 第四章 [融合实验][nb-mm-fusion] 手写 Q/K/V 与分头运算，共享输入和投影参数，对比联合 Self-Attention 与 Text-Query / Visual-Key-Value Cross-Attention。若视觉 Key 全部有效且无 Dropout，Cross-Attention 的权重等于联合 Attention 视觉子行除以视觉权重总和；但联合输出还包含文本 Value，不能据此说两种结构等价。不同参数或不同中间表示下也不能直接套用该等式。
+
+**位置、模态与可见性。** [Token / Mask 实验][nb-mm-tokens] 用可学习模态向量区分来源，并分别编码视觉网格与文本词序。向 Token 所有特征加同一个常数，会被直接作用于该向量的 LayerNorm 消除；非均匀模态向量仍不替代位置编码。Visual-prefix Mask 允许视觉内部双向交互、文本读取视觉及历史文本，同时禁止视觉读取文本，以免经后续层传递未来文本信息。Padding Key 被屏蔽不代表 Padding Query 输出自动为零；自回归训练还须将每个文本位置的输出与下一 Token 标签对齐。代码通过权重断言与输入扰动检查这些性质。
+
+**Future Topics。** 两种融合方式的训练性能对照、预训练视觉主干、真实图文对齐目标、视觉压缩与开放词汇 tokenizer 尚未实现。第四章的合成任务训练不等同于预训练 VLM。
+
+### II.5 怎样验证模型同时使用图像和文本？
+
+**实现与数据假设。** [Mini Multimodal Transformer][nb-mm-mini] 使用颜色不同的左右方块，同一图像配有左右两个问题；每种问题模板的三种颜色答案严格平衡。因此在该评价集上，只看文本的确定性分类器最高准确率为 $1/3$ ，只看图像的最高准确率为 $1/2$ 。这来自数据构造，不是任意多模态任务的通用上界。场景生成后才展开成两个问题，训练、验证、测试使用独立场景，避免同一图像的两个问题跨集合。
+
+模型包含 Patch Embedding、视觉 Encoder、可训练 Projector、文本位置和模态标记，以及两个联合 Self-Attention Block。Readout 初值为有效文本特征均值加可学习偏置，使读取从第一层就带有问题条件；这不同于 TinyViT 的共享 CLS 初值。均值本身不保留词序，完整的带位置文本 Token 仍参与融合。输出是三类颜色 logits，不是语言自回归生成。
+
+**实验观察。** seed 42、CUDA、480 个训练场景和 20 个 epoch，在独立 seed 162 的 240 个测试场景、480 个问题上，完整输入准确率为 1.000；移除视觉为 0.3333，移除文本为 0.4667。固定同一图像切换左右问题时，预测改变率与按新标签评价的准确率均为 1.000；该检查复用原测试问题，不是额外的独立测试集。
+
+完整输入超过两种单模态上界，支持模型在当前任务中使用两种输入。移除或错配模态会产生分布变化，准确率下降不能被解释成精确的模态贡献比例。该结果不证明自然语言推理、未见组合外推或多随机种子稳定性；所有颜色组合与问题模板在训练中均出现过。
 
 <a id="part-iii"></a>
 ## Part III — Generative Modeling
@@ -384,7 +402,8 @@ DDPM 学习 $\epsilon_\theta(A_t,t,o)$ ；FM 学习 $v_\theta(A_\tau,\tau,o)$ �
 | 已有机制 | 可支持的后续技术问题 | 当前边界 |
 | --- | --- | --- |
 | Attention、Mask、Encoder–Decoder | 不同信息源如何交互，如何限制信息泄漏 | 数字序列任务，没有真实语言训练 |
-| Patch Tokens、Visual Projector | 图像表示如何进入兼容的 Token 接口 | 分类器与投影实验相互独立；后者未做语义训练 |
+| Patch Tokens、Visual Projector | 图像表示如何进入兼容的 Token 接口 | 第三章两实验相互独立；投影接口未做语义训练 |
+| 合成配对映射与图文问答 | 如何通过监督和模态干预验证跨模态信息使用 | 第四章仅有可控合成数据，没有预训练 VLM 或语言生成 |
 | DDPM / FM 条件片段生成 | 如何从噪声联合生成连续输出 | 条件只有二维起终点，没有视觉或语言输入 |
 
 这些是已经分别运行的模块。仓库没有把第三章编码器接入第五章 Policy，也没有端到端 VLA 训练。
@@ -406,7 +425,7 @@ DDPM 学习 $\epsilon_\theta(A_t,t,o)$ ；FM 学习 $v_\theta(A_\tau,\tau,o)$ �
 
 ### IV.2 从当前教学实现到真实 VLA，还缺少哪些证据？
 
-**Future Topics。** 至少需要实际完成图文语义训练或接入经过验证的预训练表示，定义机器人动作空间及归一化，使用匹配的观测—指令—动作数据，再验证条件信息能否改变正确的行为。生成端点接近、Projector 梯度非零，都不足以替代这些证据。
+**Future Topics。** 需要从当前合成图文任务扩展到真实图文监督或经过验证的预训练表示，定义机器人动作空间及归一化，使用匹配的观测—指令—动作数据，再验证条件信息能否改变正确的行为。生成端点接近、Projector 梯度非零或合成问答准确率高，都不足以替代这些证据。
 
 生成式动作模型可以构成 VLA 的一部分，但“使用 Flow Matching”不是 VLA 的充分条件，也不是唯一实现方式。LM Head 与 Action Head 的联系是任务输出接口；当前 LM Head 直接映射到词表 logits，DDPM / FM Policy 则需要条件网络与迭代采样，不能把 Action Expert 一概等同于线性层，见 [Encoder–Decoder Notes §9、§12][note-encdec]。当前 Policy 的 MLP 是研究生成机制的起点；把它换成 Transformer，还要定义动作 Token、时间条件与跨模态信息路径。
 
@@ -432,7 +451,7 @@ $$
 | 后续主题 | 已有衔接点 | 转入正式内容前所需的证据 |
 | --- | --- | --- |
 | 长距离依赖、RoPE、KV Cache、变长 Mask | Part I 的因果建模与位置表示 | 对应实现、正确性检查及适用范围 |
-| 预训练视觉语言表示与多模态训练 | Part II 的 Token 接口 | 真实监督/预训练来源，任务评估与消融 |
+| 预训练视觉语言表示与多模态训练 | Part II 的 Token 接口与合成监督实验 | 真实监督/预训练来源，任务评估与消融 |
 | DiT / Transformer 动作骨干 | Part III 的噪声/速度目标 | Token 与时间条件实现，并保持目标和采样一致 |
 | 更可靠的生成比较与约束 | Part III 的 Policy | 共同测试集、预算记录、多种子、端点/多样性/约束评价 |
 | VLA 闭环执行 | 已有表示与生成机制 | 动作定义、环境反馈和任务成功评价 |
@@ -448,7 +467,7 @@ $$
 | ID | 技术问题 | 状态 | 已有依据与下一步 |
 | --- | --- | --- | --- |
 | KB-Q01 | 当前实验能证明 Attention 对历史依赖的贡献吗？ | Open | 数字加一不需要历史；翻转尚无无 Attention 基线。需历史依赖任务、基线和消融，见 I.6 |
-| KB-Q02 | 视觉与文本维度对齐后，何时才算学到语义对齐？ | Partially Resolved | 已解释形状、Padding、梯度通路及 Attention Mass 的计数基线；缺真实监督与图文任务评估，见 II.3–4、Projection Notes |
+| KB-Q02 | 视觉与文本维度对齐后，何时才算学到语义对齐？ | Partially Resolved | 已有配对合成特征检索、图文问答与模态干预；真实图文语义、分布外泛化与多种子评价仍缺，见 II.3–5 |
 | KB-Q03 | 短 DDPM 链的先验不匹配对结果影响多大？ | Partially Resolved | 累计信号非零已确认；还需控制调度、训练预算和评估分布的比较，见 III.1 |
 | KB-Q04 | DDPM Policy 与 FM Policy 在相同预算下如何取舍？ | Open | 当前预算和评价集不同，不能排序；需共同协议，见 III.7 |
 | KB-Q05 | 条件输入是否硬性保证生成端点相等？ | Resolved | 当前采样器无端点投影；保存输出有误差。结论仅为“条件输入本身不构成硬约束”，见 III.7 |
@@ -469,6 +488,7 @@ $$
 | 2026-10-11 | KB-Q05、Q06 | 建档为 Resolved（限定当前实现）：依据采样代码、数据构造及已保存输出 |
 | 2026-10-13 | KB-Q10 | 建档为 Partially Resolved：ViT Notes 与 `faff6d6` 的逐 Head 输出支持权重读取、拼接机制和色标解释；没有新增语义分工或分类贡献实验 |
 | 2026-10-13 | KB-Q02 | 保持 Partially Resolved：Projection Notes 与 `9a85235` 输出补充共享权重的梯度形状、Mask 广播和 Attention Mass 的均匀基线；这些证据仍不能替代语义训练或任务评估 |
+| 2026-10-13 | KB-Q02 | 保持 Partially Resolved：第四章增加正确／错配监督的独立检索评价、合成图文任务和问题切换；结论推进到受控数据上的信息使用，仍未覆盖真实图文对齐 |
 
 后续记录格式：`日期 / 问题 ID / 原状态 → 新状态（或状态不变） / 新证据 / 仍有的边界`。被否定的解释要记录修正原因；不要删掉问题或覆盖旧证据。新问题放入本表，核心答案融入相关 Part，避免末尾不断堆积独立总结。
 
@@ -481,6 +501,10 @@ $$
 [note-vit]: 03_Vision_Transformers/01_ViT_From_Scratch.md
 [nb-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.ipynb
 [note-projector]: 03_Vision_Transformers/02_Visual_Token_Projection.md
+[nb-mm-tokens]: 04_Multimodal_Transformer/01_Multimodal_Tokenization.ipynb
+[nb-mm-projection]: 04_Multimodal_Transformer/02_Visual_Language_Projection.ipynb
+[nb-mm-fusion]: 04_Multimodal_Transformer/03_Cross_Attention_and_Fusion.ipynb
+[nb-mm-mini]: 04_Multimodal_Transformer/04_Mini_Multimodal_Transformer.ipynb
 [nb-ring]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.ipynb
 [note-ring]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/01_2D_Ring.md
 [nb-gmm]: 05_Diffusion_and_Flow_Models/01_DDPM_Fundamentals/02_2D_Gaussian_Mixture.ipynb
