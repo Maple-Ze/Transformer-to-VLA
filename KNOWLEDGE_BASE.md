@@ -225,7 +225,7 @@ q(x_t\mid x_{t-1})=\mathcal N(\sqrt{\alpha_t}x_{t-1},\beta_tI),\qquad
 \alpha_t=1-\beta_t,\quad \bar\alpha_t=\prod_{s=1}^{t}\alpha_s.
 $$
 
-线性组合的独立高斯噪声可以合并，因此边际采样为：
+各步噪声彼此独立，并独立于干净样本。条件于 $x_0$ ，线性组合的独立高斯噪声可以合并；由于 $\mathrm{Cov}(cX)=c^2\mathrm{Cov}(X)$ ，方差系数在采样式中取平方根。因此边际采样为：
 
 $$
 x_t=\sqrt{\bar\alpha_t}x_0+\sqrt{1-\bar\alpha_t}\epsilon,\qquad
@@ -250,6 +250,16 @@ $$
 
 时间输入用于区分不同噪声级别的任务。平方回归的理想解是给定 $(x_t,t)$ 的条件平均噪声，不是恢复每条训练样本唯一、可识别的随机噪声。当前无权 MSE 是简化训练目标，不能直接等同于精确最大似然。
 
+**与 ELBO 的关系。** 对数学时间步 $t=2,\ldots,K$ ，设反向协方差 $\sigma_t^2I$ 固定、严格为正且不依赖 $\theta$ 。负 ELBO 的中间项为前向条件后验与反向模型之间的 KL。采用噪声参数化后：
+
+$$
+D_{\mathrm{KL}}\left(q(x_{t-1}\mid x_t,x_0)\mathbin{\Vert}p_\theta(x_{t-1}\mid x_t)\right)
+=C_t+\frac{\beta_t^2}{2\sigma_t^2\alpha_t(1-\bar\alpha_t)}
+\lVert\epsilon-\epsilon_\theta(x_t,t)\rVert_2^2.
+$$
+
+$C_t$ 与 $\theta$ 无关，再对数据和前向噪声取期望即可得到该步训练项。当前代码去掉时间权重，均匀抽样全部时间步；完整目标还包含末端先验项与首步重建项，不能仅由无权 MSE 代替。首步不属于这个非退化高斯 KL 推导。配方与权重推导见 [八簇实验 §3、§6][nb-gmm]，对应 [DDPM 公式 (5)、(8)、(12)、(14)](https://arxiv.org/abs/2006.11239)。
+
 生成时没有真实 $x_0$ 或真实 $\epsilon$ 。模型预测被代入反向均值，再迭代采样：
 
 $$
@@ -264,7 +274,7 @@ $$
 \sigma_t^2=\tilde\beta_t=\beta_t\frac{1-\bar\alpha_{t-1}}{1-\bar\alpha_t}.
 $$
 
-这是已知干净样本时的前向条件后验方差，不等于已经精确学到了真实反向条件分布，也不保证优于另一种方差选择。
+这是已知干净样本时的前向条件后验方差，不等于已经精确学到了真实反向条件分布，也不保证优于另一种方差选择。数学 $t=1$ 时，已知 $x_0$ 的后验是 Dirac 分布，方差表达式给出零；不能把它代入含方差倒数的精度或 KL 推导。反向均值可由估计的 $\hat x_0$ 代入后验均值得到，详见 [圆环实验 §5、§6][nb-ring]。
 
 当前噪声网络均为 MLP。圆环拼入时间标量，八簇与 Policy 使用正弦时间嵌入。它借用了位置编码的多频率表示思想，但编码的是生成阶段，不是 Token 位置。来源：[圆环 Notes][note-ring]、[八簇 Notes][note-gmm]、[DDPM Policy][nb-ddpm-policy]。
 

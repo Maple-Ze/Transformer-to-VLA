@@ -1,6 +1,6 @@
 # 02 — DDPM：二维高斯混合分布学习笔记
 
-> 对应 [02_2D_Gaussian_Mixture.ipynb](02_2D_Gaussian_Mixture.ipynb)。根据《重要：：diffusion》中从圆环推进到复杂分布的提问整理；包含后续针对时间嵌入、后验方差、采样参数的细节追问。非逐字转录。
+> 对应 Notebook：[02_2D_Gaussian_Mixture.ipynb](02_2D_Gaussian_Mixture.ipynb)。
 
 ## 一、为什么要从圆环推进到多聚类？
 
@@ -38,13 +38,13 @@ alpha_bar_prev = torch.cat([
 ])
 ```
 
-**问题：`alpha_bar[:-1]` 不就已经有之前的值了吗？** 它只包含数组的第 `0...T-2` 项，对应数学公式中的 $\bar\alpha_1,\ldots,\bar\alpha_{T-1}$。为了让数组 `alpha_bar_prev[t]` 对齐“当前代码索引 `t` 对应的前一步累计乘积”，需要在前面补入数学上的 $\bar\alpha_0=1$；即 `alpha_bar_prev[0] = 1`。结果长度仍然是 `T`。
+**问题：`alpha_bar[:-1]` 不就已经有之前的值了吗？** 它只包含数组的第 `0...T-2` 项，对应数学公式中的 $\bar\alpha_1,\ldots,\bar\alpha_{T-1}$ 。为了让数组 `alpha_bar_prev[t]` 对齐“当前代码索引 `t` 对应的前一步累计乘积”，需要在前面补入数学上的 $\bar\alpha_0=1$ ；即 `alpha_bar_prev[0] = 1`。结果长度仍然是 `T`。
 
 **问题：这与之前的圆环 DDPM 代码有何不同？** 圆环案例可直接用 `beta[t]` 作为反向方差的一种固定选择；这里显式计算前向过程的条件后验方差，便于理解另一种常见实现。
 
 ## 四、`posterior_variance` 到底是什么？
 
-前向扩散在给定干净样本 `x0` 和当前带噪样本 `xt` 后，有解析后验：
+对数学时间步 $t=2,\ldots,T$ ，前向扩散在给定干净样本 `x0` 和当前带噪样本 `xt` 后，有非退化的高斯后验：
 
 $$
 q(\mathbf x_{t-1}\mid\mathbf x_t,\mathbf x_0)
@@ -60,14 +60,23 @@ $$
 
 **问题：为什么 `posterior_variance` 与 `beta` 不一样？** `beta_t` 是前向单步加噪方差；`tilde_beta_t` 是额外知道 `x0` 时前一步的条件后验方差。二者意义不同。实际反向模型的固定方差可以采用不同设计；这份代码选后者。
 
-**注意代码索引**：Python `t=0` 对应数学上首次加噪步，此时 `alpha_bar_prev[0]=1`，后验方差为 0，最后一次更新不用再采样新噪声。
+**问题：这个方差怎么推导？** 用贝叶斯公式把后验写成 $q(\mathbf x_t\mid\mathbf x_{t-1})q(\mathbf x_{t-1}\mid\mathbf x_0)$ 的归一化形式，对两个高斯密度的指数项配方。合并后的标量精度为：
+
+$$
+\lambda_t=\frac{\alpha_t}{\beta_t}+\frac{1}{1-\bar\alpha_{t-1}},
+\qquad \widetilde\beta_t=\lambda_t^{-1}.
+$$
+
+展开与均值推导分别见 [Notebook §3、§7](02_2D_Gaussian_Mixture.ipynb)。这里的后验以真实 $\mathbf x_0$ 为条件，不等于生成时未知 $\mathbf x_0$ 的 $q(\mathbf x_{t-1}\mid\mathbf x_t)$ 。
+
+**首步边界与代码索引**：Python `t=0` 对应数学 $t=1$ ，此时 `alpha_bar_prev[0]=1`，最终方差表达式给出 0。已知 $\mathbf x_0$ 的后验退化为集中在该点的 Dirac 分布；不能把 $1-\bar\alpha_0=0$ 代入上面含倒数的精度推导。采样的最后一次更新只返回均值，不再采样新噪声。
 
 ## 五、为什么改用 Sinusoidal Time Embedding？
 
 圆环里直接拼入 `t/T`。多聚类实验把离散时间映射成多个频率的正余弦分量：
 
 $$
-\operatorname{TE}(t)=
+\mathrm{TE}(t)=
 [\sin(t\omega_1),\ldots,\sin(t\omega_m),
 \cos(t\omega_1),\ldots,\cos(t\omega_m)].
 $$
@@ -88,6 +97,15 @@ frequencies = torch.exp(
 ## 六、反向采样为什么仍然逐步进行？
 
 训练时随机 `t`，使用闭式公式取得 `xt`，优化噪声预测 MSE；生成时从 `N(0,I)` 出发，用预测噪声计算每一步反向均值，并根据 `posterior_variance` 加入随机扰动。反向过程不是简单地“把训练噪声减掉”，因为生成时没有真值噪声、也没有真实 `x0`。
+
+**问题：噪声 MSE 是完整的 ELBO 吗？** 不是。对 $t\geq2$ ，若反向协方差 $\sigma_t^2I$ 固定、严格为正且不依赖模型参数，后验 KL 的均值误差部分等于：
+
+$$
+\frac{\beta_t^2}{2\sigma_t^2\alpha_t(1-\bar\alpha_t)}
+\lVert\boldsymbol\epsilon-\boldsymbol\epsilon_\theta(\mathbf x_t,t)\rVert_2^2.
+$$
+
+代码均匀采样时间步并去掉该时间权重；`mse_loss` 还对二维坐标取平均，相比平方范数多一个常数因子 $1/2$ 。完整负 ELBO 另含末端先验项与首步重建项；本代码没有实现它们的完整评估。尤其不能将首步的零后验方差代入上式。Jensen 不等式、KL 与 MSE 的推导见 [Notebook §6](02_2D_Gaussian_Mixture.ipynb)。
 
 ## 七、对照代码和实验检查
 
