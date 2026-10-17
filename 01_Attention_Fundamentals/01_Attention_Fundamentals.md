@@ -84,7 +84,7 @@ $$
 $QK^\top$ 只得到了**从哪里获取信息的分数**；Softmax 将分数转为权重；只有再乘 V，才形成**具体获取到的信息**：
 
 $$
-A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right),\qquad Y=AV.
+A=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right),\qquad Y=AV.
 $$
 
 对于第 $i$ 个 Query：
@@ -138,7 +138,7 @@ $$
 第二项对同一行的所有 Key 都是同一个常数。而 Softmax 满足：
 
 $$
-\operatorname{softmax}(z+c\mathbf1)=\operatorname{softmax}(z),
+\mathrm{softmax}(z+c\mathbf1)=\mathrm{softmax}(z),
 $$
 
 因此 Key Bias 的这一共同平移会在按行 Softmax 中抵消。
@@ -170,7 +170,7 @@ $$
 计算为：
 
 $$
-A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+M\right).
+A=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+M\right).
 $$
 
 被掩码的位置在 Softmax 后权重为 0。因此因果顺序应是：**Scores → Mask → Softmax → Value Aggregation**。
@@ -190,13 +190,13 @@ $$
 例： $C=32$ 、 $H=4$ ，每个 Head 的维度 $d_h=8$ 。每个 Head 独立计算：
 
 $$
-head_h=\operatorname{softmax}\left(\frac{Q_hK_h^\top}{\sqrt{8}}+M\right)V_h.
+head_h=\mathrm{softmax}\left(\frac{Q_hK_h^\top}{\sqrt{8}}+M\right)V_h.
 $$
 
 然后拼接各头输出并作输出投影：
 
 $$
-Y=\operatorname{Concat}(head_1,\ldots,head_H)W_O.
+Y=\mathrm{Concat}(head_1,\ldots,head_H)W_O.
 $$
 
 这种设计允许不同 Head 学习不同的匹配规则和聚合方式，而不强制所有关系使用同一张 Attention 权重图。并非每个 Head 都一定会学到清晰可解释、互不重复的语义功能。
@@ -213,7 +213,7 @@ $$
 
 1. **先投影，再分头。** 对完整的输入 $X\in\mathbb R^{T\times32}$ ，第 $h$ 个 Head 通过其自己的投影矩阵得到 $Q_h=XW_Q^{(h)}$ 、 $K_h=XW_K^{(h)}$ 、 $V_h=XW_V^{(h)}$ ，其中 $W_Q^{(h)},W_K^{(h)},W_V^{(h)}\in\mathbb R^{32\times8}$ 。因此，每个 Head 的 8 维特征都**可以由原始全部 32 个 Channel 线性组合而来**，不是只截取原始输入中的 8 个 Channel。
 2. **计算 Attention 时，Head 之间确实独立。** 第一个 Head 的 $Q_1$ 不直接和第二个 Head 的 $K_2$ 做点积。每个 Head 独立产生 $[T,T]$ 的权重矩阵；但**所有 Head 都覆盖全部 $T$ 个 Token**，不是只关注一部分 Token。
-3. **计算完成后再融合。** $\operatorname{Concat}(head_1,\ldots,head_H)$ 经 $W_O\in\mathbb R^{32\times32}$ 投影，各 Head 输出重新混合；后续层又可以在混合后的特征上重新构建 Q/K/V。
+3. **计算完成后再融合。** $\mathrm{Concat}(head_1,\ldots,head_H)$ 经 $W_O\in\mathbb R^{32\times32}$ 投影，各 Head 输出重新混合；后续层又可以在混合后的特征上重新构建 Q/K/V。
 
 因此更准确的结构是：
 
@@ -268,7 +268,7 @@ $$
 训练时可以对 Softmax 后的部分注意力权重随机置零，减少模型过度依赖特定注意力连接，帮助正则化。2017 年原始 Transformer 的训练配置确实包括 Attention Dropout 以及其他位置的 Dropout。
 
 $$
-\widetilde A=\operatorname{Dropout}(A),\qquad Y=\widetilde A V.
+\widetilde A=\mathrm{Dropout}(A),\qquad Y=\widetilde A V.
 $$
 
 训练时保留的权重通常按 $1/(1-p)$ 缩放，因而 Dropout 后一行的权重和**不一定等于 1**；推理模式下关闭 Dropout。Dropout 是**训练机制**，不是 Attention 数学定义的必要部分。
@@ -280,21 +280,21 @@ $$
 对。教学模型使用更接近 GPT 的 **Decoder-only、Causal Self-Attention、Pre-LN** 结构：
 
 $$
-x_1=x+\operatorname{MHA}(\operatorname{LN}(x)),
+x_1=x+\mathrm{MHA}(\mathrm{LN}(x)),
 $$
 
 $$
-y=x_1+\operatorname{MLP}(\operatorname{LN}(x_1)).
+y=x_1+\mathrm{MLP}(\mathrm{LN}(x_1)).
 $$
 
 而原始《Attention Is All You Need》（2017）使用 **Encoder–Decoder** 架构；其子层为 **Post-LN**，即残差相加后再 LayerNorm：
 
 $$
-x_1=\operatorname{LN}(x+\operatorname{MHA}(x)),
+x_1=\mathrm{LN}(x+\mathrm{MHA}(x)),
 $$
 
 $$
-y=\operatorname{LN}(x_1+\operatorname{FFN}(x_1)).
+y=\mathrm{LN}(x_1+\mathrm{FFN}(x_1)).
 $$
 
 两者对比：
@@ -312,7 +312,7 @@ $$
 主要理解其对**每个 Token 的特征维度**分别计算均值和方差，并使用可学习的缩放 $\gamma$ 和平移 $\beta$ ：
 
 $$
-\operatorname{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}+\beta.
+\mathrm{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}+\beta.
 $$
 
 它帮助稳定特征尺度与训练，不负责 Token 间信息交互。**Residual Connection（残差连接）**让输入直接绕过子层后与子层输出相加，有利于优化与信息传递。**FFN/MLP** 对每个 Token 的特征独立进行非线性变换，不负责跨 Token 交互。实际位置间的信息传递由 Attention 完成。
@@ -370,7 +370,7 @@ $$
 因为前面位置已经对应序列内部的下一 Token 预测，只有最后一个位置对应**当前前缀之后尚不存在的 Token**。因此生成时取最后一个位置的 logits，再进行 greedy decoding 或 sampling。
 
 $$
-P(x_{1:n})=\prod_{t=1}^{n}P(x_t\mid x_{<t})
+P(x_{1:n})=\prod_{t=1}^{n}P(x_t\mid x_{\lt t})
 $$
 
 这是**Autoregressive Generation（自回归生成）**的基本思想。
