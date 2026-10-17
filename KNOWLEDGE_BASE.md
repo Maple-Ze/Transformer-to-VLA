@@ -1,6 +1,6 @@
 # Transformer-to-VLA · 技术知识库
 
-本知识库围绕技术问题组织已实现的机制、适用条件与跨章节联系。实验步骤、完整推导和局部问答保留在各章 Notebook / Notes；项目使用方法与路线见 [README](README.md)。维护规则见 [AGENTS.md](AGENTS.md)。
+本知识库围绕技术问题组织已实现的机制、适用条件与跨章节联系。实验步骤、完整推导和局部问答保留在各章 Notebook / Notes；项目使用方法与路线见 [README](README.md)。
 
 ## 阅读与证据约定
 

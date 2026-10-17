@@ -46,6 +46,8 @@ Stages 03–04 connect visual tokens with multimodal fusion; Stage 05 develops g
 
 Notebooks provide runnable implementations; accompanying notes cover mathematical explanations, tensor analysis, and design discussions.
 
+**Reading the notes:** Some LaTeX expressions in the Markdown notes are not supported by GitHub's renderer and may display incorrectly. For a better reading experience, download or clone this repository and open the notes in VS Code's Markdown preview with math rendering enabled, or another math-capable Markdown reader.
+
 Explore the [Knowledge Base](KNOWLEDGE_BASE.md) for core concepts, cross-chapter connections, and open questions.
 
 | Stage | Notebook | Notes | Colab |
@@ -96,7 +98,6 @@ Open a notebook in Jupyter or VS Code and select the environment's Python kernel
 Transformer-to-VLA/
 ├── README.md
 ├── KNOWLEDGE_BASE.md
-├── AGENTS.md
 ├── LICENSE
 ├── .gitignore
 ├── requirements.txt
