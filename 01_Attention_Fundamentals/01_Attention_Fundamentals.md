@@ -315,7 +315,7 @@ $$
 \mathrm{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}+\beta.
 $$
 
-它帮助稳定特征尺度与训练，不负责 Token 间信息交互。**Residual Connection（残差连接）**让输入直接绕过子层后与子层输出相加，有利于优化与信息传递。**FFN/MLP** 对每个 Token 的特征独立进行非线性变换，不负责跨 Token 交互。实际位置间的信息传递由 Attention 完成。
+它帮助稳定特征尺度与训练，不负责 Token 间信息交互。**Residual Connection（残差连接）** 让输入直接绕过子层后与子层输出相加，有利于优化与信息传递。**FFN/MLP** 对每个 Token 的特征独立进行非线性变换，不负责跨 Token 交互。实际位置间的信息传递由 Attention 完成。
 
 ## 10. vocab_size、context_length 和 T 究竟有什么区别？
 
@@ -373,7 +373,7 @@ $$
 P(x_{1:n})=\prod_{t=1}^{n}P(x_t\mid x_{\lt t})
 $$
 
-这是**Autoregressive Generation（自回归生成）**的基本思想。
+这是**Autoregressive Generation（自回归生成）** 的基本思想。
 
 **问：为什么每步都重新传入整个上下文？**
 
