@@ -42,7 +42,7 @@ $$
 - $\alpha_t$ ：**这一步**上一状态信号的平方系数。
 - $\sqrt{\beta_t}$ 、 $\sqrt{\alpha_t}$ ：实际乘在向量上的幅值系数。
 
-**Lemma 1（协方差缩放与独立噪声相加）**： $\operatorname{Cov}(cX)=c^2\operatorname{Cov}(X)$ ；独立随机向量相加时，协方差相加。因此要让新噪声的协方差为 $\beta_t I$ ，应乘 $\sqrt{\beta_t}$ ，而不是 $\beta_t$ 。证明见[附录 A.1](#lemma-1)。
+**Lemma 1（协方差缩放与独立噪声相加）**： $\mathrm{Cov}(cX)=c^2\mathrm{Cov}(X)$ ；独立随机向量相加时，协方差相加。因此要让新噪声的协方差为 $\beta_t I$ ，应乘 $\sqrt{\beta_t}$ ，而不是 $\beta_t$ 。证明见[附录 A.1](#lemma-1)。
 
 $\alpha_t+\beta_t=1$ 使单位协方差在单步更新下保持不变，但不意味着任意数据的协方差都是 $I$ ，也不会自动把圆环数据标准化。
 
@@ -165,7 +165,7 @@ def forward(self, x_t, t):
     return self.net(torch.cat([x_t, t_normalized], dim=-1))
 ```
 
-维度是 `[B,2]` 和 `[B,1]` **拼接（cat）**成 `[B,3]`，MLP 输出 `[B,2]` 的噪声。**这不是广播，而是特征拼接**。这里代码下标为 $k=0,\ldots,T-1$ ，实际时间特征是 $k/T$ ，对应数学时间的 $(t-1)/T$ ；当前取值范围是 $0$ 到 $0.99$ 。MLP 结构为 `3 → 128 → 128 → 2`，两个隐藏层均使用 ReLU。
+维度是 `[B,2]` 和 `[B,1]` **拼接（cat）** 成 `[B,3]`，MLP 输出 `[B,2]` 的噪声。**这不是广播，而是特征拼接**。这里代码下标为 $k=0,\ldots,T-1$ ，实际时间特征是 $k/T$ ，对应数学时间的 $(t-1)/T$ ；当前取值范围是 $0$ 到 $0.99$ 。MLP 结构为 `3 → 128 → 128 → 2`，两个隐藏层均使用 ReLU。
 
 ### 3.2 为什么 MSE 预测噪声可以估计 `x0`？
 
@@ -186,7 +186,7 @@ $$
 
 ### 3.3 MSE 与最大似然的关系
 
-原始 DDPM 源于概率模型的变分下界（ELBO）。**Lemma 7（固定高斯方差时 KL 的均值项）**说明：某些中间 KL 项可化为**带时间权重**的噪声预测平方误差，再加与网络参数无关的常数。本实验只使用**不带时间权重**的 `mse_loss`：它既不是完整 ELBO，也不等价于直接最大化精确对数似然。见[附录 A.7](#lemma-7)。
+原始 DDPM 源于概率模型的变分下界（ELBO）。**Lemma 7（固定高斯方差时 KL 的均值项）** 说明：某些中间 KL 项可化为**带时间权重**的噪声预测平方误差，再加与网络参数无关的常数。本实验只使用**不带时间权重**的 `mse_loss`：它既不是完整 ELBO，也不等价于直接最大化精确对数似然。见[附录 A.7](#lemma-7)。
 
 ---
 
@@ -349,19 +349,19 @@ def sample_ddpm(n_samples=2000):
 **命题。** 对具有有限二阶矩的随机向量 $X$ 、标量 $c$ ，
 
 $$
-\operatorname{Cov}(cX)=c^2\operatorname{Cov}(X).
+\mathrm{Cov}(cX)=c^2\mathrm{Cov}(X).
 $$
 
-若 $X,Y$ 具有有限二阶矩、维度相同且独立，则 $\operatorname{Cov}(X+Y)=\operatorname{Cov}(X)+\operatorname{Cov}(Y)$ 。
+若 $X,Y$ 具有有限二阶矩、维度相同且独立，则 $\mathrm{Cov}(X+Y)=\mathrm{Cov}(X)+\mathrm{Cov}(Y)$ 。
 
 **证明。** 按定义，
 
 $$
-\operatorname{Cov}(cX)=\mathbb E[(cX-c\mathbb EX)(cX-c\mathbb EX)^\top]
-=c^2\operatorname{Cov}(X).
+\mathrm{Cov}(cX)=\mathbb E[(cX-c\mathbb EX)(cX-c\mathbb EX)^\top]
+=c^2\mathrm{Cov}(X).
 $$
 
-展开 $\operatorname{Cov}(X+Y)$ 有两个自身协方差项和两个交叉项；独立性使两个交叉项都为零，得证。因此 $\operatorname{Cov}(\sqrt{\beta_t}\epsilon)=\beta_t I$ 。 $\square$
+展开 $\mathrm{Cov}(X+Y)$ 有两个自身协方差项和两个交叉项；独立性使两个交叉项都为零，得证。因此 $\mathrm{Cov}(\sqrt{\beta_t}\epsilon)=\beta_t I$ 。 $\square$
 
 <a id="lemma-2"></a>
 ### A.2 Lemma 2：独立高斯变量的线性组合
