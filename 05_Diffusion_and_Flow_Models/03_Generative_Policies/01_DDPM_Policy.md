@@ -70,12 +70,12 @@ A_t=\sqrt{\bar\alpha_t}A_0+
 \quad\operatorname{vec}(\epsilon)\sim\mathcal N(0,I_{2H}).
 $$
 
-这里将 $2H$ 个独立标准高斯数整理为 $H\times2$ 的噪声矩阵，协方差 $I_{2H}$ 是方阵。`epsilon` 的形状与 `A0` 一致 `[B,16,2]`，同一扩散时间步对应一整个轨迹样本。公式用 $t=1,\ldots,T$，代码索引 `t=0,...,T-1` 对应公式的第 `t+1` 步；反向采样从 $A_T$ 逐步得到 $A_0$。模型学习：
+这里将 $2H$ 个独立标准高斯数整理为 $H\times2$ 的噪声矩阵，协方差 $I_{2H}$ 是方阵。`epsilon` 的形状与 `A0` 一致 `[B,16,2]`，同一扩散时间步对应一整个轨迹样本。公式用 $t=1,\ldots,T$ ，代码索引 `t=0,...,T-1` 对应公式的第 `t+1` 步；反向采样从 $A_T$ 逐步得到 $A_0$ 。模型学习：
 
 $$
 \epsilon_\theta(A_t,t,o)\in\mathbb R^{16\times 2},
 \quad
-\mathcal L=\mathbb E\|\epsilon-\epsilon_\theta(A_t,t,o)\|^2.
+\mathcal L=\mathbb E\Vert \epsilon-\epsilon_\theta(A_t,t,o)\Vert ^2.
 $$
 
 教学网络暂时将 `[16,2]` 展平、与时间嵌入和条件向量融合，再输出 `[16,2]`；不需要立刻使用 Transformer、U-Net 或视觉模型。

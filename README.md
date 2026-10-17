@@ -46,7 +46,7 @@ Stages 03–04 connect visual tokens with multimodal fusion; Stage 05 develops g
 
 Notebooks provide runnable implementations; accompanying notes cover mathematical explanations, tensor analysis, and design discussions.
 
-**Reading the notes:** Some LaTeX expressions in the Markdown notes are not supported by GitHub's renderer and may display incorrectly. For a better reading experience, download or clone this repository and open the notes in VS Code's Markdown preview with math rendering enabled, or another math-capable Markdown reader.
+**Reading the notes:** Mathematical expressions follow [GitHub's supported LaTeX syntax](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions). If equations do not display correctly in your browser, download or clone this repository and open the notes in VS Code's Markdown preview with math rendering enabled, or another math-capable Markdown reader.
 
 Explore the [Knowledge Base](KNOWLEDGE_BASE.md) for core concepts, cross-chapter connections, and open questions.
 

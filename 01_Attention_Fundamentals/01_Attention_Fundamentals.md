@@ -12,7 +12,7 @@
 
 不是，方向恰好相反：**Token Embedding 将离散的 Token ID 映射成连续特征向量**；生成端则把隐藏特征映射为词表上各个 Token 的预测分数（logits），再选择 Token ID。
 
-设词表大小为 $V$、隐藏维度为 $C$，Token Embedding 是一张可训练的表 $E\in\mathbb R^{V\times C}$。输入 `[5, 7, 8, 1]` 后，查出四个向量，形成 $4\times C$ 的特征矩阵（如果保留 Batch 维，则是 $[1,4,C]$）。
+设词表大小为 $V$ 、隐藏维度为 $C$ ，Token Embedding 是一张可训练的表 $E\in\mathbb R^{V\times C}$ 。输入 `[5, 7, 8, 1]` 后，查出四个向量，形成 $4\times C$ 的特征矩阵（如果保留 Batch 维，则是 $[1,4,C]$ ）。
 
 **问：Token ID 没有信息量，只是标记，特征在 Embedding 之后才显现，对吗？**
 
@@ -38,13 +38,15 @@ $$
 
 不包含位置机制的普通 Self-Attention 本身不知道 Token 的绝对先后顺序：同步重排输入 Token，输出也会对应重排（Permutation Equivariance）。仅知道“是什么”，还需要知道“在哪里”。
 
-教学 Mini-GPT 使用**可学习的绝对位置嵌入（Learnable Positional Embedding）**：每个位置 $t$ 对应可训练向量 $p_t$，输入为
+教学 Mini-GPT 使用**可学习的绝对位置嵌入（Learnable Positional Embedding）**：每个位置 $t$ 对应可训练向量 $p_t$ ，输入为
 
-$$h_t=e_{x_t}+p_t.$$
+$$
+h_t=e_{x_t}+p_t.
+$$
 
 **问：每个 Batch 是否加相同的位置编码？**
 
-是。若各样本都从位置 0 开始，同一位置 $t$ 共享相同的 $p_t$，但不同样本的 Token Embedding 可能不同，因此最终特征不一定相同。
+是。若各样本都从位置 0 开始，同一位置 $t$ 共享相同的 $p_t$ ，但不同样本的 Token Embedding 可能不同，因此最终特征不一定相同。
 
 **问：原始 Transformer 不是使用 sin/cos 吗？**
 
@@ -59,13 +61,15 @@ $$
 
 ## 3. Self-Attention 为什么要使用 Q、K、V？
 
-**问：为什么不是直接用输入 $X$ 计算 $XX^\top$？为什么一定要 Q/K/V 三个？**
+**问：为什么不是直接用输入 $X$ 计算 $XX^\top$ ？为什么一定要 Q/K/V 三个？**
 
 直接对 $X$ 计算相似度并用 $X$ 聚合，数学上也能构成一种 Attention。但使用三个独立的可训练投影，能够将**匹配规则**与**被传递的内容**分开：
 
-$$Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V.$$
+$$
+Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V.
+$$
 
-此处是论文中的行向量右乘记法。三者都来自同一个 $X$，并不是三份不同原始数据。
+此处是论文中的行向量右乘记法。三者都来自同一个 $X$ ，并不是三份不同原始数据。
 
 - **Query (Q)**：当前 Token 希望匹配什么特征；
 - **Key (K)**：其他 Token 提供什么特征供匹配；
@@ -73,9 +77,9 @@ $$Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V.$$
 
 **问：Q 和 K 为什么还要区分？**
 
-如果二者使用独立投影，则一般有 $q_i k_j^\top\neq q_j k_i^\top$：A 关注 B，并不要求 B 同等关注 A。单纯的 $XX^\top$ 在 Softmax 之前是对称的，表达匹配关系的自由度更小。
+如果二者使用独立投影，则一般有 $q_i k_j^\top\neq q_j k_i^\top$ ：A 关注 B，并不要求 B 同等关注 A。单纯的 $XX^\top$ 在 Softmax 之前是对称的，表达匹配关系的自由度更小。
 
-**问：已经算出 $QK^\top$，为什么还要乘 V？**
+**问：已经算出 $QK^\top$ ，为什么还要乘 V？**
 
 $QK^\top$ 只得到了**从哪里获取信息的分数**；Softmax 将分数转为权重；只有再乘 V，才形成**具体获取到的信息**：
 
@@ -85,23 +89,31 @@ $$
 
 对于第 $i$ 个 Query：
 
-$$y_i=\sum_{j=1}^{T}a_{ij}v_j.$$
+$$
+y_i=\sum_{j=1}^{T}a_{ij}v_j.
+$$
 
-例如 $a_{1,:}=[0.1,0.2,0.4,0.2,0.1]$，则
+例如 $a_{1,:}=[0.1,0.2,0.4,0.2,0.1]$ ，则
 
-$$y_1=0.1v_1+0.2v_2+0.4v_3+0.2v_4+0.1v_5.$$
+$$
+y_1=0.1v_1+0.2v_2+0.4v_3+0.2v_4+0.1v_5.
+$$
 
 每个 $a_{ij}$ 是标量，每个 $v_j$ 是向量，结果是对 Value 向量按 Token 维度做加权求和。**Q/K 负责信息选择，V 负责内容聚合。**
 
-## 4. Attention 为什么产生 $[T,T]$，又为什么按 Key 做 Softmax？
+## 4. Attention 为什么产生 $[T,T]$ ，又为什么按 Key 做 Softmax？
 
-对于 Self-Attention，如果一个样本有 $T$ 个 Token，$Q,K\in\mathbb R^{T\times d_k}$，则：
+对于 Self-Attention，如果一个样本有 $T$ 个 Token， $Q,K\in\mathbb R^{T\times d_k}$ ，则：
 
-$$QK^\top:\quad [T,d_k]\,[d_k,T]\to[T,T].$$
+$$
+QK^\top:\quad [T,d_k]\thinspace [d_k,T]\to[T,T].
+$$
 
-行索引 $i$ 是 Query 位置，列索引 $j$ 是 Key 位置：$s_{ij}=q_i k_j^\top/\sqrt{d_k}$。一个 Query 要对**所有 Key**分配注意力，因此对每行归一化：
+行索引 $i$ 是 Query 位置，列索引 $j$ 是 Key 位置： $s_{ij}=q_i k_j^\top/\sqrt{d_k}$ 。一个 Query 要对**所有 Key**分配注意力，因此对每行归一化：
 
-$$a_{ij}=\frac{e^{s_{ij}}}{\sum_{k=1}^{T}e^{s_{ik}}},\qquad\sum_j a_{ij}=1.$$
+$$
+a_{ij}=\frac{e^{s_{ij}}}{\sum_{k=1}^{T}e^{s_{ik}}},\qquad\sum_j a_{ij}=1.
+$$
 
 **问：为什么不是按 Query 归一化？** 因为标准 Attention 想回答“第 $i$ 个 Query 应该从哪些 Key 获取信息”，不是“某个 Key 应该被多少 Query 分配关注度”。
 
@@ -113,15 +125,21 @@ $$a_{ij}=\frac{e^{s_{ij}}}{\sum_{k=1}^{T}e^{s_{ik}}},\qquad\sum_j a_{ij}=1.$$
 
 不是所有 Bias 都没用。对于普通点积 Attention，**共享的 Key Bias** 有一个明确的冗余性质。设
 
-$$k_j=k_j^{(0)}+b_K,$$
+$$
+k_j=k_j^{(0)}+b_K,
+$$
 
-那么对于固定 Query $i$：
+那么对于固定 Query $i$ ：
 
-$$q_i^\top k_j=q_i^\top k_j^{(0)}+q_i^\top b_K.$$
+$$
+q_i^\top k_j=q_i^\top k_j^{(0)}+q_i^\top b_K.
+$$
 
 第二项对同一行的所有 Key 都是同一个常数。而 Softmax 满足：
 
-$$\operatorname{softmax}(z+c\mathbf1)=\operatorname{softmax}(z),$$
+$$
+\operatorname{softmax}(z+c\mathbf1)=\operatorname{softmax}(z),
+$$
 
 因此 Key Bias 的这一共同平移会在按行 Softmax 中抵消。
 
@@ -136,19 +154,24 @@ $$\operatorname{softmax}(z+c\mathbf1)=\operatorname{softmax}(z),$$
 
 **问：Mini-GPT 为什么必须使用 Causal Attention？**
 
-因为它执行 **Next-Token Prediction（下一 Token 预测）**：位置 $t$ 必须根据 $x_{\le t}$ 预测 $x_{t+1}$，不能在训练时读到输入序列中后面的位置，避免目标泄漏。
+因为它执行 **Next-Token Prediction（下一 Token 预测）**：位置 $t$ 必须根据 $x_{\le t}$ 预测 $x_{t+1}$ ，不能在训练时读到输入序列中后面的位置，避免目标泄漏。
 
 例如输入 `[3,4,5,6]`，每个位置分别预测 `[4,5,6,7]`。若第一个位置可以看见第二个输入 Token `4`，模型可能直接“偷看”答案，而不学习从已有前缀预测未来。
 
 Causal Mask 使每个 Query 仅能关注**自身和之前**的 Key。它是下三角可见性约束：
 
 $$
-M_{ij}=\begin{cases}0,&j\le i,\\-\infty,&j>i.\end{cases}
+M_{ij}=\begin{cases}
+0,&j\le i,\\
+-\infty,&j>i.
+\end{cases}
 $$
 
 计算为：
 
-$$A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+M\right).$$
+$$
+A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+M\right).
+$$
 
 被掩码的位置在 Softmax 后权重为 0。因此因果顺序应是：**Scores → Mask → Softmax → Value Aggregation**。
 
@@ -164,19 +187,23 @@ $$A=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}+M\right).$$
 
 不是。**每个 Head 都能看到全部 Token**，只是对 Token 使用自己的一组 Q/K/V 投影特征。
 
-例：$C=32$、$H=4$，每个 Head 的维度 $d_h=8$。每个 Head 独立计算：
+例： $C=32$ 、 $H=4$ ，每个 Head 的维度 $d_h=8$ 。每个 Head 独立计算：
 
-$$head_h=\operatorname{softmax}\left(\frac{Q_hK_h^\top}{\sqrt{8}}+M\right)V_h.$$
+$$
+head_h=\operatorname{softmax}\left(\frac{Q_hK_h^\top}{\sqrt{8}}+M\right)V_h.
+$$
 
 然后拼接各头输出并作输出投影：
 
-$$Y=\operatorname{Concat}(head_1,\ldots,head_H)W_O.$$
+$$
+Y=\operatorname{Concat}(head_1,\ldots,head_H)W_O.
+$$
 
 这种设计允许不同 Head 学习不同的匹配规则和聚合方式，而不强制所有关系使用同一张 Attention 权重图。并非每个 Head 都一定会学到清晰可解释、互不重复的语义功能。
 
-**问：为什么缩放时除以 $\sqrt{8}$ 而不是 $\sqrt{32}$？**
+**问：为什么缩放时除以 $\sqrt{8}$ 而不是 $\sqrt{32}$ ？**
 
-因为每个 Head 的 Q/K 点积发生在 $d_h=8$ 的特征空间。缩放因子应对应实际点积维度 $\sqrt{d_h}$，以减轻高维点积分数过大导致 Softmax 过于尖锐的问题。
+因为每个 Head 的 Q/K 点积发生在 $d_h=8$ 的特征空间。缩放因子应对应实际点积维度 $\sqrt{d_h}$ ，以减轻高维点积分数过大导致 Softmax 过于尖锐的问题。
 
 ### 7.1 既然 Channel 被拆分了，Head 之间是不是无法计算全局关联？
 
@@ -184,13 +211,15 @@ $$Y=\operatorname{Concat}(head_1,\ldots,head_H)W_O.$$
 
 **答：要区分“投影之前的全局信息”和“投影之后的独立计算”。**
 
-1. **先投影，再分头。** 对完整的输入 $X\in\mathbb R^{T\times32}$，第 $h$ 个 Head 通过其自己的投影矩阵得到 $Q_h=XW_Q^{(h)}$、$K_h=XW_K^{(h)}$、$V_h=XW_V^{(h)}$，其中 $W_Q^{(h)},W_K^{(h)},W_V^{(h)}\in\mathbb R^{32\times8}$。因此，每个 Head 的 8 维特征都**可以由原始全部 32 个 Channel 线性组合而来**，不是只截取原始输入中的 8 个 Channel。
+1. **先投影，再分头。** 对完整的输入 $X\in\mathbb R^{T\times32}$ ，第 $h$ 个 Head 通过其自己的投影矩阵得到 $Q_h=XW_Q^{(h)}$ 、 $K_h=XW_K^{(h)}$ 、 $V_h=XW_V^{(h)}$ ，其中 $W_Q^{(h)},W_K^{(h)},W_V^{(h)}\in\mathbb R^{32\times8}$ 。因此，每个 Head 的 8 维特征都**可以由原始全部 32 个 Channel 线性组合而来**，不是只截取原始输入中的 8 个 Channel。
 2. **计算 Attention 时，Head 之间确实独立。** 第一个 Head 的 $Q_1$ 不直接和第二个 Head 的 $K_2$ 做点积。每个 Head 独立产生 $[T,T]$ 的权重矩阵；但**所有 Head 都覆盖全部 $T$ 个 Token**，不是只关注一部分 Token。
 3. **计算完成后再融合。** $\operatorname{Concat}(head_1,\ldots,head_H)$ 经 $W_O\in\mathbb R^{32\times32}$ 投影，各 Head 输出重新混合；后续层又可以在混合后的特征上重新构建 Q/K/V。
 
 因此更准确的结构是：
 
-$$\boxed{\text{全部输入 Channel 投影}\ \longrightarrow\ \text{各 Head 独立的低维 Attention}\ \longrightarrow\ \text{输出混合}}$$
+$$
+\boxed{\text{全部输入 Channel 投影}\ \longrightarrow\ \text{各 Head 独立的低维 Attention}\ \longrightarrow\ \text{输出混合}}
+$$
 
 **需要保留的限制：** 一个 Head 的 Q/K 匹配只在其 8 维空间内完成；不存在同一层里所有 Head 之间任意的交叉 Q/K 点积。全维输入投影和输出混合并不意味着它与单个 32 维 Attention 的计算等价。
 
@@ -200,14 +229,18 @@ $$\boxed{\text{全部输入 Channel 投影}\ \longrightarrow\ \text{各 Head 独
 
 **答：随机初始化有助于打破对称性，但根本原因是不同 Head 拥有相互独立、可以分别学习的 Q/K/V 参数，以及各自的 Attention 权重分布。**
 
-对同一个 Query，单头只产生一套 $a_{ij}$，并用这套 Token 权重聚合它负责的所有 Value 通道：
+对同一个 Query，单头只产生一套 $a_{ij}$ ，并用这套 Token 权重聚合它负责的所有 Value 通道：
 
-$$o_i=\sum_j a_{ij}v_j.$$
+$$
+o_i=\sum_j a_{ij}v_j.
+$$
 
 而多头可以让不同 Head 对同一个 Query 产生不同权重：
 
-$$o_i^{(1)}=\sum_j a_{ij}^{(1)}v_j^{(1)},\qquad
-  o_i^{(2)}=\sum_j a_{ij}^{(2)}v_j^{(2)}.$$
+$$
+o_i^{(1)}=\sum_j a_{ij}^{(1)}v_j^{(1)},\qquad
+  o_i^{(2)}=\sum_j a_{ij}^{(2)}v_j^{(2)}.
+$$
 
 例如，第一个 Head 可以偏向前一个 Token，第二个 Head 可以偏向更早的 Token；这些只是**可能学到的模式**，不是预先写死的规则。
 
@@ -234,7 +267,9 @@ $$o_i^{(1)}=\sum_j a_{ij}^{(1)}v_j^{(1)},\qquad
 
 训练时可以对 Softmax 后的部分注意力权重随机置零，减少模型过度依赖特定注意力连接，帮助正则化。2017 年原始 Transformer 的训练配置确实包括 Attention Dropout 以及其他位置的 Dropout。
 
-$$\widetilde A=\operatorname{Dropout}(A),\qquad Y=\widetilde A V.$$
+$$
+\widetilde A=\operatorname{Dropout}(A),\qquad Y=\widetilde A V.
+$$
 
 训练时保留的权重通常按 $1/(1-p)$ 缩放，因而 Dropout 后一行的权重和**不一定等于 1**；推理模式下关闭 Dropout。Dropout 是**训练机制**，不是 Attention 数学定义的必要部分。
 
@@ -244,13 +279,23 @@ $$\widetilde A=\operatorname{Dropout}(A),\qquad Y=\widetilde A V.$$
 
 对。教学模型使用更接近 GPT 的 **Decoder-only、Causal Self-Attention、Pre-LN** 结构：
 
-$$x_1=x+\operatorname{MHA}(\operatorname{LN}(x)),$$
-$$y=x_1+\operatorname{MLP}(\operatorname{LN}(x_1)).$$
+$$
+x_1=x+\operatorname{MHA}(\operatorname{LN}(x)),
+$$
+
+$$
+y=x_1+\operatorname{MLP}(\operatorname{LN}(x_1)).
+$$
 
 而原始《Attention Is All You Need》（2017）使用 **Encoder–Decoder** 架构；其子层为 **Post-LN**，即残差相加后再 LayerNorm：
 
-$$x_1=\operatorname{LN}(x+\operatorname{MHA}(x)),$$
-$$y=\operatorname{LN}(x_1+\operatorname{FFN}(x_1)).$$
+$$
+x_1=\operatorname{LN}(x+\operatorname{MHA}(x)),
+$$
+
+$$
+y=\operatorname{LN}(x_1+\operatorname{FFN}(x_1)).
+$$
 
 两者对比：
 
@@ -264,9 +309,11 @@ $$y=\operatorname{LN}(x_1+\operatorname{FFN}(x_1)).$$
 
 **问：LayerNorm 需要学到什么程度？**
 
-主要理解其对**每个 Token 的特征维度**分别计算均值和方差，并使用可学习的缩放 $\gamma$ 和平移 $\beta$：
+主要理解其对**每个 Token 的特征维度**分别计算均值和方差，并使用可学习的缩放 $\gamma$ 和平移 $\beta$ ：
 
-$$\operatorname{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}+\beta.$$
+$$
+\operatorname{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}+\beta.
+$$
 
 它帮助稳定特征尺度与训练，不负责 Token 间信息交互。**Residual Connection（残差连接）**让输入直接绕过子层后与子层输出相加，有利于优化与信息传递。**FFN/MLP** 对每个 Token 的特征独立进行非线性变换，不负责跨 Token 交互。实际位置间的信息传递由 Attention 完成。
 
@@ -276,11 +323,11 @@ $$\operatorname{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}
 
 不是：
 
-- $V=\texttt{vocab\_size}$：有多少种不同 Token，可用 ID 范围；决定 Token Embedding 的词表行数和 LM Head 的类别数。
-- $L=\texttt{context\_length}$：这个模型配置下一次最多处理多少个 Token；在教学实现中，也决定可学习位置表的大小。
-- $T$：当前这一次输入序列的实际长度，要求 $T\le L$。
+- $`V=\texttt{vocab\_size}`$ ：有多少种不同 Token，可用 ID 范围；决定 Token Embedding 的词表行数和 LM Head 的类别数。
+- $`L=\texttt{context\_length}`$ ：这个模型配置下一次最多处理多少个 Token；在教学实现中，也决定可学习位置表的大小。
+- $T$ ：当前这一次输入序列的实际长度，要求 $T\le L$ 。
 
-例如 $V=10,L=16,T=8,B=2,C=32$ 时，模型接受 2 条每条 8 个 Token 的输入，内部特征为 $[2,8,32]$，最后输出 logits 为 $[2,8,10]$。$V$ 不必与 $T$ 或 $L$ 存在大小关系。
+例如 $V=10,L=16,T=8,B=2,C=32$ 时，模型接受 2 条每条 8 个 Token 的输入，内部特征为 $[2,8,32]$ ，最后输出 logits 为 $[2,8,10]$ 。 $V$ 不必与 $T$ 或 $L$ 存在大小关系。
 
 ## 11. 为什么每个位置都预测下一个 Token？
 
@@ -295,7 +342,7 @@ $$\operatorname{LN}(x_i)=\gamma\odot\frac{x_i-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}
 | `[3,4,5]` | `6` |
 | `[3,4,5,6]` | `7` |
 
-一次带因果掩码的 Forward 同时完成这四次预测，并对所有位置的目标进行 **Cross-Entropy Loss**。在这个过程中，$[B,T,V]$ 表示每个样本每个位置都对 $V$ 种 Token 输出一组 logits。每个位置产生一个分类损失，训练时通常在所有有效位置求平均：
+一次带因果掩码的 Forward 同时完成这四次预测，并对所有位置的目标进行 **Cross-Entropy Loss**。在这个过程中， $[B,T,V]$ 表示每个样本每个位置都对 $V$ 种 Token 输出一组 logits。每个位置产生一个分类损失，训练时通常在所有有效位置求平均：
 
 $$
 \mathcal L=-\frac1{BT}\sum_{b=1}^{B}\sum_{t=1}^{T}
@@ -343,11 +390,15 @@ $$
 
 **完全正确。** 该任务的规则是
 
-$$x_{t+1}=(x_t+1)\bmod10.$$
+$$
+x_{t+1}=(x_t+1)\bmod10.
+$$
 
 下一个数字只依赖当前数字，连普通逐 Token 映射都可以完成：
 
-$$P(x_{t+1}\mid x_{\le t})=P(x_{t+1}\mid x_t).$$
+$$
+P(x_{t+1}\mid x_{\le t})=P(x_{t+1}\mid x_t).
+$$
 
 所以这里加入 Attention **不是因为任务需要跨 Token 信息**，而是为了把完整的 Transformer 组件串起来，验证前向、因果掩码、训练、Loss 和自回归生成。**Loss 下降不能作为 Attention 有价值的证据。**
 

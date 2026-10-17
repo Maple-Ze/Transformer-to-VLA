@@ -221,7 +221,7 @@ QK^T
 \mathbb{R}^{B\times T\times S}
 $$
 
-其中转置只交换最后两个维度，Softmax 沿 $S$ 维计算。多头实现中，每个 Head 使用 $d_k=d_v=D=C/H$，因此缩放因子是 $\sqrt{D}$。
+其中转置只交换最后两个维度，Softmax 沿 $S$ 维计算。多头实现中，每个 Head 使用 $d_k=d_v=D=C/H$ ，因此缩放因子是 $\sqrt{D}$ 。
 
 含义：
 
@@ -467,14 +467,14 @@ $$
 
 10000 控制不同 Channel 的频率范围。
 
-对于偶数维度 $d_{\mathrm{model}}$，实际角频率为：
+对于偶数维度 $d_{\mathrm{model}}$ ，实际角频率为：
 
 $$
 \omega_i=10000^{-2i/d_{\mathrm{model}}},
 \qquad i=0,\ldots,\frac{d_{\mathrm{model}}}{2}-1
 $$
 
-最大角频率为 $1$，最小为 $10000^{-(d_{\mathrm{model}}-2)/d_{\mathrm{model}}}$；后者随模型宽度增大接近 $1/10000$，并非有限维度下恰好等于它。
+最大角频率为 $1$ ，最小为 $10000^{-(d_{\mathrm{model}}-2)/d_{\mathrm{model}}}$ ；后者随模型宽度增大接近 $1/10000$ ，并非有限维度下恰好等于它。
 
 这是经验参数，用于覆盖不同长度序列。
 
@@ -524,7 +524,7 @@ $$
 Logits=HiddenW_{out}+b_{out}
 $$
 
-这里采用行向量右乘的数学记法， $W_{out}\in\mathbb{R}^{C\times V}$；PyTorch `nn.Linear` 存储的权重形状为 `[V,C]`，实际计算 `hidden @ weight.T + bias`。当前代码保留了 Bias。
+这里采用行向量右乘的数学记法， $W_{out}\in\mathbb{R}^{C\times V}$ ；PyTorch `nn.Linear` 存储的权重形状为 `[V,C]`，实际计算 `hidden @ weight.T + bias`。当前代码保留了 Bias。
 
 维度：
 
